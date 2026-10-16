@@ -163,6 +163,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        webView.evaluateJavascript(
+            "(function(){ var s = document.getElementById('readerSheet'); if(s && s.classList.contains('open')){ closeReader(); return 'closed'; } return 'none'; })();"
+        ) { res ->
+            if (res == null || !res.contains("closed")) {
+                super.onBackPressed()
+            }
+        }
+    }
+
     override fun onDestroy() {
         if (isBound) {
             mailService?.setUiListener(null)

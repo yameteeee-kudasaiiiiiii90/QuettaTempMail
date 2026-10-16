@@ -291,7 +291,8 @@ class QuettaMailService : Service() {
         val subtitle = "${apiClient.status} • $msgCount msg(s)"
 
         return NotificationCompat.Builder(this, CHANNEL_SERVICE)
-            .setSmallIcon(R.drawable.ic_launcher)
+            .setSmallIcon(R.drawable.ic_stat_quetta)
+            .setColor(0xFF0A84FF.toInt())
             .setContentTitle("⚡ $currentEmail")
             .setContentText(subtitle)
             .setOngoing(true)
@@ -330,7 +331,8 @@ class QuettaMailService : Service() {
         val expandedBody = "From: ${em.from}\n\n${em.preview}"
 
         val builder = NotificationCompat.Builder(this, CHANNEL_ALERTS)
-            .setSmallIcon(R.drawable.ic_launcher)
+            .setSmallIcon(R.drawable.ic_stat_quetta)
+            .setColor(0xFF0A84FF.toInt())
             .setContentTitle(title)
             .setContentText("From: ${em.from.take(100)}")
             .setStyle(NotificationCompat.BigTextStyle().bigText(expandedBody))

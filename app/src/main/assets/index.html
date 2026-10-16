@@ -2,339 +2,920 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Quetta Temp Mail</title>
 <style>
   :root {
-    --bg: #070b14;
-    --card: #111827;
-    --card-hover: #1f2937;
-    --border: #263248;
-    --text: #f8fafc;
-    --muted: #94a3b8;
-    --accent: #38bdf8;
-    --accent-hover: #0284c7;
-    --otp-bg: rgba(34, 197, 94, 0.16);
-    --otp-border: #22c55e;
-    --otp-text: #4ade80;
-    --danger: #ef4444;
-    --success: #22c55e;
+    --ios-bg: #000000;
+    --ios-bg-elevated: #1c1c1e;
+    --ios-bg-secondary: #2c2c2e;
+    --ios-bg-tertiary: #3a3a3c;
+    --ios-card: rgba(28, 28, 30, 0.88);
+    --ios-glass: rgba(28, 28, 30, 0.72);
+    --ios-border: rgba(255, 255, 255, 0.09);
+    --ios-separator: rgba(84, 84, 88, 0.45);
+    --ios-text: #ffffff;
+    --ios-subtext: #8e8e93;
+    --ios-blue: #0a84ff;
+    --ios-indigo: #5e5ce6;
+    --ios-green: #30d158;
+    --ios-red: #ff453a;
+    --ios-orange: #ff9f0a;
+    --ios-purple: #bf5af2;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+  }
+
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: var(--bg);
-    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Roboto, sans-serif;
+    background-color: var(--ios-bg);
+    background-image:
+      radial-gradient(circle at 18% 0%, rgba(10, 132, 255, 0.22) 0%, transparent 45%),
+      radial-gradient(circle at 85% 6%, rgba(94, 92, 230, 0.20) 0%, transparent 45%);
+    background-attachment: fixed;
+    color: var(--ios-text);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    padding-bottom: 84px;
+    overflow-x: hidden;
   }
-  header {
-    background: #111827;
-    border-bottom: 1px solid var(--border);
-    padding: 13px 14px;
+
+  /* iOS Top Blur Header */
+  .ios-header {
     position: sticky;
     top: 0;
-    z-index: 20;
+    z-index: 40;
+    padding: 14px 18px 12px 18px;
+    background: rgba(12, 14, 22, 0.78);
+    backdrop-filter: saturate(180%) blur(24px);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    border-bottom: 0.5px solid var(--ios-border);
   }
-  .top-row {
+
+  .header-container {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .nav-top-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 10px;
-    gap: 6px;
+    margin-bottom: 6px;
   }
-  .brand {
-    font-weight: 800;
-    font-size: 1.04rem;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
+
   .status-pill {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-size: 0.73rem;
-    color: var(--muted);
-    background: rgba(255,255,255,0.05);
-    border: 1px solid var(--border);
-    padding: 4px 10px;
+    padding: 4px 11px;
     border-radius: 999px;
-  }
-  .dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--success);
-  }
-  .dot.err { background: var(--danger); }
-  @keyframes spin { 100% { transform: rotate(360deg); } }
-  .spinning { display: inline-block; animation: spin 0.65s linear infinite; }
-
-  .email-box {
-    width: 100%;
-    background: #050811;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 11px 12px;
-    font-family: monospace;
-    font-size: 0.94rem;
-    color: var(--accent);
-    margin-bottom: 9px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .btn-group {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
-  }
-  button {
-    border: 1px solid var(--border);
-    background: var(--card-hover);
-    color: var(--text);
-    padding: 10px 6px;
-    border-radius: 10px;
-    font-size: 0.79rem;
+    background: rgba(48, 209, 88, 0.14);
+    border: 0.5px solid rgba(48, 209, 88, 0.35);
+    color: #5ef27e;
+    font-size: 0.74rem;
     font-weight: 600;
-    cursor: pointer;
+    letter-spacing: -0.01em;
+  }
+
+  .status-pill.err {
+    background: rgba(255, 69, 58, 0.16);
+    border-color: rgba(255, 69, 58, 0.4);
+    color: #ff6961;
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--ios-green);
+    box-shadow: 0 0 8px var(--ios-green);
+    animation: pulse 2s infinite;
+  }
+
+  .status-pill.err .status-dot {
+    background: var(--ios-red);
+    box-shadow: 0 0 8px var(--ios-red);
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  @keyframes spin {
+    100% { transform: rotate(360deg); }
+  }
+  .spinning { animation: spin 0.7s linear infinite; }
+
+  .top-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ios-icon-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 0.5px solid var(--ios-border);
+    color: var(--ios-blue);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    cursor: pointer;
+    transition: transform 0.12s ease, background 0.15s ease;
   }
-  button:active { transform: scale(0.97); }
-  button:disabled { opacity: 0.55; }
-  button.primary {
-    background: var(--accent);
-    color: #050811;
-    border-color: var(--accent);
+
+  .ios-icon-btn:active {
+    transform: scale(0.91);
+    background: rgba(255, 255, 255, 0.16);
   }
-  button.otp-chip {
-    background: var(--otp-bg);
-    border-color: var(--otp-border);
-    color: var(--otp-text);
-    padding: 4px 10px;
-    font-size: 0.76rem;
-    border-radius: 999px;
+
+  .ios-icon-btn svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
-  button.danger {
-    color: #fca5a5;
-    border-color: rgba(239, 68, 68, 0.4);
-  }
-  main {
-    flex: 1;
-    padding: 12px;
+
+  .large-title-row {
     display: flex;
-    flex-direction: column;
-  }
-  main.reading .inbox-pane { display: none; }
-  main:not(.reading) .reader-pane { display: none; }
-  .pane {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-  }
-  .pane-header {
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--border);
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--muted);
-    display: flex;
+    align-items: baseline;
     justify-content: space-between;
-    align-items: center;
+    margin-bottom: 12px;
   }
-  .search-bar {
-    padding: 8px 12px;
-    border-bottom: 1px solid var(--border);
-    background: rgba(0,0,0,0.2);
+
+  .ios-large-title {
+    font-size: 1.85rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: #ffffff;
   }
-  .search-bar input {
-    width: 100%;
-    background: #070b14;
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 8px 11px;
-    border-radius: 8px;
-    font-size: 0.83rem;
-    outline: none;
+
+  .last-sync-label {
+    font-size: 0.73rem;
+    color: var(--ios-subtext);
   }
-  .msg-list { list-style: none; overflow-y: auto; flex: 1; }
-  .msg-item {
-    padding: 13px 14px;
-    border-bottom: 1px solid var(--border);
-  }
-  .msg-from {
-    font-weight: 600;
-    font-size: 0.89rem;
-    margin-bottom: 4px;
+
+  /* Frosted iOS Address Capsule */
+  .address-capsule {
+    background: rgba(38, 40, 48, 0.78);
+    border: 0.5px solid rgba(255, 255, 255, 0.13);
+    border-radius: 16px;
+    padding: 8px 8px 8px 14px;
     display: flex;
+    align-items: center;
     justify-content: space-between;
     gap: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    margin-bottom: 12px;
   }
-  .msg-time { font-size: 0.73rem; color: var(--muted); font-weight: 400; }
-  .msg-subj { font-size: 0.86rem; margin-bottom: 4px; }
-  .msg-prev { font-size: 0.78rem; color: var(--muted); }
-  .otp-row { margin-top: 7px; display: flex; gap: 6px; }
-  .empty-state {
+
+  .address-text {
+    font-family: "SF Mono", ui-monospace, Menlo, monospace;
+    font-size: 0.93rem;
+    font-weight: 500;
+    color: #f2f2f7;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     flex: 1;
+    cursor: pointer;
+    user-select: all;
+  }
+
+  .capsule-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .ios-pill-btn {
+    border: none;
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 11px;
+    cursor: pointer;
+    transition: all 0.14s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+  }
+
+  .ios-pill-btn.primary {
+    background: var(--ios-blue);
+    color: #ffffff;
+  }
+
+  .ios-pill-btn:active {
+    transform: scale(0.95);
+    opacity: 0.85;
+  }
+
+  /* iOS Segmented Control */
+  .segmented-control {
+    background: rgba(118, 118, 128, 0.24);
+    border-radius: 10px;
+    padding: 2px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+
+  .seg-btn {
+    border: none;
+    background: transparent;
+    color: var(--ios-subtext);
+    font-size: 0.81rem;
+    font-weight: 600;
+    padding: 6px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+
+  .seg-btn.active {
+    background: rgba(99, 99, 102, 0.65);
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Main Container */
+  .ios-main {
+    max-width: 680px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 14px 16px;
+    flex: 1;
+  }
+
+  .search-wrap {
+    position: relative;
+    margin-bottom: 14px;
+  }
+
+  .search-wrap svg {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 15px;
+    height: 15px;
+    stroke: var(--ios-subtext);
+    stroke-width: 2;
+    fill: none;
+  }
+
+  .ios-search {
+    width: 100%;
+    background: rgba(118, 118, 128, 0.24);
+    border: 0.5px solid transparent;
+    border-radius: 10px;
+    padding: 9px 12px 9px 34px;
+    color: #ffffff;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border 0.15s ease;
+  }
+
+  .ios-search::placeholder {
+    color: var(--ios-subtext);
+  }
+
+  .ios-search:focus {
+    border-color: var(--ios-blue);
+    background: rgba(118, 118, 128, 0.32);
+  }
+
+  .section-heading {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .section-count {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--ios-subtext);
+  }
+
+  /* iOS Inset Grouped Message Cards */
+  .msg-cards {
     display: flex;
     flex-direction: column;
+    gap: 10px;
+  }
+
+  .msg-card {
+    background: var(--ios-card);
+    border: 0.5px solid var(--ios-border);
+    border-radius: 18px;
+    padding: 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+    cursor: pointer;
+    transition: transform 0.12s ease, background 0.15s ease;
+    position: relative;
+  }
+
+  .msg-card:active {
+    transform: scale(0.985);
+    background: rgba(44, 44, 46, 0.92);
+  }
+
+  .avatar-squircle {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    flex-shrink: 0;
+    display: flex;
     align-items: center;
     justify-content: center;
-    padding: 40px 20px;
-    text-align: center;
-    color: var(--muted);
-    gap: 8px;
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   }
-  .reader-meta {
-    padding: 14px;
-    border-bottom: 1px solid var(--border);
-    background: rgba(0,0,0,0.18);
+
+  .avatar-otp {
+    background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
   }
-  .reader-top-actions {
+
+  .avatar-blue {
+    background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+  }
+
+  .avatar-red {
+    background: linear-gradient(135deg, #ef4444 0%, #991b1b 100%);
+  }
+
+  .avatar-green {
+    background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+  }
+
+  .avatar-orange {
+    background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+  }
+
+  .msg-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .msg-top-line {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 2px;
   }
-  .reader-subj { font-size: 1.06rem; font-weight: 700; margin: 6px 0; }
-  .meta-line { font-size: 0.79rem; color: var(--muted); margin-bottom: 4px; }
-  .meta-line strong { color: var(--text); }
-  .otp-banner {
-    margin-top: 10px;
-    padding: 9px 11px;
-    border-radius: 10px;
-    background: var(--otp-bg);
-    border: 1px solid var(--otp-border);
+
+  .msg-sender {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .msg-meta-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .msg-time {
+    font-size: 0.76rem;
+    color: var(--ios-subtext);
+  }
+
+  .star-btn {
+    border: none;
+    background: transparent;
+    color: var(--ios-subtext);
+    font-size: 0.95rem;
+    cursor: pointer;
+    padding: 0 2px;
+  }
+
+  .star-btn.starred {
+    color: #ffd60a;
+  }
+
+  .msg-subject {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #e5e5ea;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 3px;
+  }
+
+  .msg-preview {
+    font-size: 0.82rem;
+    color: var(--ios-subtext);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .otp-action-chip {
+    margin-top: 9px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 0.5px solid rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+    padding: 6px 12px;
+    border-radius: 9px;
+    font-size: 0.79rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .otp-action-chip:active {
+    background: rgba(255, 255, 255, 0.18);
+  }
+
+  .empty-box {
+    background: var(--ios-card);
+    border: 0.5px solid var(--ios-border);
+    border-radius: 20px;
+    padding: 46px 20px;
+    text-align: center;
+    color: var(--ios-subtext);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .empty-icon-circle {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: rgba(10, 132, 255, 0.12);
+    color: var(--ios-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.65rem;
+    margin-bottom: 4px;
+  }
+
+  /* iOS Slide-Over Reader Modal */
+  .reader-sheet {
+    position: fixed;
+    inset: 0;
+    background: var(--ios-bg);
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.26s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .reader-sheet.open {
+    transform: translateX(0);
+  }
+
+  .reader-navbar {
+    background: rgba(22, 22, 24, 0.85);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 0.5px solid var(--ios-border);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .ios-back-btn {
+    border: none;
+    background: transparent;
+    color: var(--ios-blue);
+    font-size: 0.98rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+
+  .reader-toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .reader-header-card {
+    padding: 16px 18px;
+    border-bottom: 0.5px solid var(--ios-border);
+    background: rgba(28, 28, 30, 0.55);
+  }
+
+  .reader-subj {
+    font-size: 1.22rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+
+  .reader-meta-line {
+    font-size: 0.81rem;
+    color: var(--ios-subtext);
+    margin-bottom: 3px;
+  }
+
+  .reader-meta-line strong {
+    color: #e5e5ea;
+  }
+
+  .reader-otp-banner {
+    margin-top: 12px;
+    padding: 11px 14px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.18), rgba(10, 132, 255, 0.18));
+    border: 0.5px solid rgba(168, 85, 247, 0.45);
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 8px;
   }
-  .view-tabs { display: flex; gap: 6px; margin-top: 10px; }
-  .view-tabs button { padding: 6px 12px; font-size: 0.76rem; }
-  .view-tabs button.active {
-    background: var(--accent);
-    color: #050811;
-    border-color: var(--accent);
-  }
-  .reader-body {
-    padding: 16px;
+
+  .reader-body-text {
+    padding: 18px;
     flex: 1;
     overflow-y: auto;
     white-space: pre-wrap;
     word-break: break-word;
-    font-size: 0.91rem;
-    line-height: 1.55;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #f2f2f7;
   }
-  iframe.html-viewer {
-    width: 100%;
-    min-height: 400px;
-    border: none;
-    background: #fff;
+
+  .reader-html-frame {
     flex: 1;
+    width: 100%;
+    border: none;
+    background: #ffffff;
   }
-  .toast {
+
+  /* Settings & Generate Panes */
+  .ios-grouped-list {
+    background: var(--ios-card);
+    border: 0.5px solid var(--ios-border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 18px;
+  }
+
+  .ios-list-row {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 0.5px solid var(--ios-separator);
+  }
+
+  .ios-list-row:last-child {
+    border-bottom: none;
+  }
+
+  .row-label {
+    font-size: 0.94rem;
+    font-weight: 500;
+  }
+
+  .row-sub {
+    font-size: 0.77rem;
+    color: var(--ios-subtext);
+    margin-top: 2px;
+  }
+
+  /* iOS Frosted Bottom Tab Bar */
+  .ios-tabbar {
     position: fixed;
-    bottom: 20px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 68px;
+    background: rgba(22, 22, 26, 0.82);
+    backdrop-filter: saturate(180%) blur(25px);
+    -webkit-backdrop-filter: saturate(180%) blur(25px);
+    border-top: 0.5px solid var(--ios-border);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    max-width: 680px;
+    margin: 0 auto;
+    z-index: 50;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .tab-item {
+    border: none;
+    background: transparent;
+    color: var(--ios-subtext);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.15s ease;
+  }
+
+  .tab-item.active {
+    color: var(--ios-blue);
+  }
+
+  .tab-item svg {
+    width: 22px;
+    height: 22px;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* iOS Toast Pill */
+  .ios-toast {
+    position: fixed;
+    top: 16px;
     left: 50%;
-    transform: translateX(-50%);
-    background: #1e293b;
-    border: 1px solid var(--accent);
-    color: var(--text);
-    padding: 9px 16px;
+    transform: translateX(-50%) translateY(-80px);
+    background: rgba(44, 44, 46, 0.95);
+    backdrop-filter: blur(16px);
+    border: 0.5px solid rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+    padding: 10px 18px;
     border-radius: 999px;
-    font-size: 0.81rem;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s;
+    font-size: 0.84rem;
+    font-weight: 600;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
     z-index: 100;
     white-space: nowrap;
   }
-  .toast.show { opacity: 1; }
+
+  .ios-toast.show {
+    transform: translateX(-50%) translateY(0);
+  }
 </style>
 </head>
 <body>
-<header>
-  <div class="top-row">
-    <div class="brand">⚡ Quetta Temp Mail</div>
-    <div class="status-pill">
-      <span id="dot" class="dot"></span>
-      <span id="statusText">Starting...</span>
-      <span id="lastChecked" style="opacity:0.7;"></span>
+
+<!-- Top iOS Navigation Header -->
+<header class="ios-header">
+  <div class="header-container">
+    <div class="nav-top-bar">
+      <div id="statusPill" class="status-pill">
+        <span class="status-dot"></span>
+        <span id="statusText">Watching Live</span>
+      </div>
+      <div class="top-actions">
+        <button class="ios-icon-btn" onclick="manualRefresh()" id="refreshBtn" title="Refresh Inbox">
+          <svg id="refSvg" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+        </button>
+        <button class="ios-icon-btn" onclick="rotateEmail()" id="composeRotateBtn" title="Delete Old & Generate New Address">
+          <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </button>
+      </div>
     </div>
-  </div>
-  <div id="emailBox" class="email-box" onclick="copyEmail()">Initializing...</div>
-  <div class="btn-group">
-    <button class="primary" onclick="copyEmail()">📋 Copy</button>
-    <button onclick="manualRefresh()" id="refreshBtn"><span id="refIcon">🔄</span> Refresh</button>
-    <button onclick="rotateEmail()" id="rotateBtn">🗑️+✨ New</button>
-    <button class="danger" onclick="exitApp()">✖ Exit</button>
+
+    <div class="large-title-row">
+      <h1 class="ios-large-title">Quetta Temp Mail</h1>
+      <span id="lastChecked" class="last-sync-label"></span>
+    </div>
+
+    <!-- Frosted Address Capsule -->
+    <div class="address-capsule">
+      <div id="emailBox" class="address-text" onclick="copyEmail()">Initializing...</div>
+      <div class="capsule-actions">
+        <button class="ios-pill-btn" onclick="copyEmail()">Copy</button>
+      </div>
+    </div>
+
+    <!-- iOS Segmented Control -->
+    <div class="segmented-control" id="inboxSegments">
+      <button class="seg-btn active" id="segAll" onclick="setFilterSegment('all')">Inbox</button>
+      <button class="seg-btn" id="segStarred" onclick="setFilterSegment('starred')">Starred</button>
+      <button class="seg-btn" id="segOtp" onclick="setFilterSegment('otp')">OTP Codes</button>
+    </div>
   </div>
 </header>
 
-<main id="mainGrid">
-  <section class="pane inbox-pane">
-    <div class="pane-header">
-      <span>INBOX (<span id="msgCount">0</span>)</span>
-      <button style="padding:4px 8px; font-size:0.72rem;" onclick="enableKeepAlive()">🔋 Keep Alive</button>
+<!-- Main Content Views -->
+<main class="ios-main">
+  <!-- TAB 1: INBOX VIEW -->
+  <section id="tabInboxView">
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="search" id="searchInput" class="ios-search" placeholder="Search sender, subject, or OTP..." oninput="renderList()">
     </div>
-    <div class="search-bar">
-      <input type="search" id="searchInput" placeholder="Search sender, subject, or OTP..." oninput="renderList()">
+
+    <div class="section-heading">
+      <span id="sectionTitle">Inbox</span>
+      <span id="msgCount" class="section-count">0 messages</span>
     </div>
-    <ul id="msgList" class="msg-list"></ul>
-    <div id="inboxEmpty" class="empty-state">
-      <div style="font-size: 2rem;">📭</div>
-      <div>No messages yet</div>
-      <div style="font-size: 0.75rem;">Foreground Service is watching live in the background</div>
+
+    <div id="msgList" class="msg-cards"></div>
+
+    <div id="inboxEmpty" class="empty-box">
+      <div class="empty-icon-circle">Tray</div>
+      <div style="font-weight: 600; color: #ffffff; font-size: 1rem;">No Messages Yet</div>
+      <div style="font-size: 0.83rem; max-width: 260px; line-height: 1.4;">Incoming emails and verification codes will appear here automatically.</div>
     </div>
   </section>
 
-  <section class="pane reader-pane">
-    <div class="reader-meta">
-      <div class="reader-top-actions">
-        <button onclick="closeReader()" style="padding:6px 12px;">← Back</button>
-        <button class="danger" onclick="deleteCurrentEmail()" style="padding:6px 12px;">🗑️ Delete</button>
-      </div>
-      <div id="rSubj" class="reader-subj"></div>
-      <div class="meta-line"><strong>From:</strong> <span id="rFrom"></span></div>
-      <div class="meta-line"><strong>To:</strong> <span id="rTo"></span></div>
-      <div class="meta-line"><strong>Date:</strong> <span id="rDate"></span></div>
-
-      <div id="rOtpBanner" class="otp-banner" style="display:none;">
-        <strong style="color:var(--otp-text);">🔑 Code: <span id="rOtpValue" style="font-family:monospace;"></span></strong>
-        <div style="display:flex; gap:6px;">
-          <button class="otp-chip" onclick="copyDetectedOtp()">Copy Code</button>
-          <a id="rVerifyLink" href="#" style="color:var(--accent); font-size:0.78rem; align-self:center; display:none;">🔗 Verify Link</a>
+  <!-- TAB 2: GENERATE / ADDRESS MANAGER VIEW -->
+  <section id="tabGenerateView" style="display:none;">
+    <div class="section-heading">
+      <span>Disposable Identity</span>
+    </div>
+    <div class="ios-grouped-list">
+      <div class="ios-list-row">
+        <div>
+          <div class="row-label">Active Temp Email</div>
+          <div class="row-sub" id="genCurrentEmail" style="font-family:monospace; color:var(--ios-blue);">-</div>
         </div>
+        <button class="ios-pill-btn primary" onclick="copyEmail()">Copy</button>
       </div>
-
-      <div class="view-tabs">
-        <button id="tabText" class="active" onclick="setMode('text')">Clean Text</button>
-        <button id="tabHtml" onclick="setMode('html')">Original HTML</button>
+      <div class="ios-list-row">
+        <div>
+          <div class="row-label">Generate New Address</div>
+          <div class="row-sub">Permanently deletes current address &amp; creates a brand new inbox</div>
+        </div>
+        <button class="ios-pill-btn" style="background:var(--ios-indigo);" onclick="rotateEmail()" id="genRotateBtn">New Mail</button>
       </div>
     </div>
-    <div id="rTextBody" class="reader-body"></div>
-    <iframe id="rHtmlFrame" class="html-viewer" sandbox="allow-popups allow-popups-to-escape-sandbox" style="display:none;"></iframe>
+  </section>
+
+  <!-- TAB 3: HISTORY VIEW -->
+  <section id="tabHistoryView" style="display:none;">
+    <div class="section-heading">
+      <span>Session Activity</span>
+    </div>
+    <div class="ios-grouped-list" id="historyList">
+      <div class="ios-list-row">
+        <div class="row-sub">Address rotations and OTP detections during this session appear here.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 4: SETTINGS VIEW -->
+  <section id="tabSettingsView" style="display:none;">
+    <div class="section-heading">
+      <span>Settings &amp; Background</span>
+    </div>
+    <div class="ios-grouped-list">
+      <div class="ios-list-row">
+        <div>
+          <div class="row-label">Unrestricted Background Polling</div>
+          <div class="row-sub">Exempt app from Android battery optimization so OTPs arrive instantly</div>
+        </div>
+        <button class="ios-pill-btn" onclick="enableKeepAlive()">Keep Alive</button>
+      </div>
+      <div class="ios-list-row">
+        <div>
+          <div class="row-label">Destroy Inbox &amp; Exit</div>
+          <div class="row-sub">Deletes active address from server and stops background service</div>
+        </div>
+        <button class="ios-pill-btn" style="background:rgba(255,69,58,0.2); color:var(--ios-red);" onclick="exitApp()">Exit App</button>
+      </div>
+    </div>
   </section>
 </main>
 
-<div id="toast" class="toast"></div>
+<!-- iOS Slide-Over Email Reader Sheet -->
+<aside id="readerSheet" class="reader-sheet">
+  <div class="reader-navbar">
+    <button class="ios-back-btn" onclick="closeReader()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Inbox
+    </button>
+    <div class="reader-toolbar-right">
+      <button class="ios-pill-btn" onclick="exportCurrentEmail()">Save .txt</button>
+      <button class="ios-pill-btn" style="background:rgba(255,69,58,0.2); color:var(--ios-red);" onclick="deleteCurrentEmail()">Delete</button>
+    </div>
+  </div>
+
+  <div class="reader-header-card">
+    <div id="rSubj" class="reader-subj"></div>
+    <div class="reader-meta-line"><strong>From:</strong> <span id="rFrom"></span></div>
+    <div class="reader-meta-line"><strong>To:</strong> <span id="rTo"></span></div>
+    <div class="reader-meta-line"><strong>Date:</strong> <span id="rDate"></span></div>
+
+    <div id="rOtpBanner" class="reader-otp-banner" style="display:none;">
+      <div>
+        <div style="font-size:0.74rem; color:#d8b4fe; font-weight:600;">VERIFICATION CODE</div>
+        <div id="rOtpValue" style="font-family:monospace; font-size:1.15rem; font-weight:800; color:#ffffff;"></div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="ios-pill-btn primary" onclick="copyDetectedOtp()">Copy OTP</button>
+        <a id="rVerifyLink" href="#" target="_blank" rel="noopener" class="ios-pill-btn" style="text-decoration:none; display:none;">Verify Link</a>
+      </div>
+    </div>
+
+    <div id="rAttachments" style="margin-top:10px; display:none; gap:6px; flex-wrap:wrap;"></div>
+
+    <div class="segmented-control" style="margin-top:12px; grid-template-columns: repeat(2, 1fr);">
+      <button id="tabText" class="seg-btn active" onclick="setMode('text')">Clean Text</button>
+      <button id="tabHtml" class="seg-btn" onclick="setMode('html')">Original HTML</button>
+    </div>
+  </div>
+
+  <div id="rTextBody" class="reader-body-text"></div>
+  <iframe id="rHtmlFrame" class="reader-html-frame" sandbox="allow-popups allow-popups-to-escape-sandbox" style="display:none;"></iframe>
+</aside>
+
+<!-- iOS Bottom Tab Bar -->
+<nav class="ios-tabbar">
+  <button class="tab-item active" id="navInbox" onclick="switchTab('inbox')">
+    <svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+    <span>Inbox</span>
+  </button>
+  <button class="tab-item" id="navGenerate" onclick="switchTab('generate')">
+    <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    <span>Generate</span>
+  </button>
+  <button class="tab-item" id="navHistory" onclick="switchTab('history')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    <span>History</span>
+  </button>
+  <button class="tab-item" id="navSettings" onclick="switchTab('settings')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <span>Settings</span>
+  </button>
+</nav>
+
+<div id="toast" class="ios-toast"></div>
 
 <script>
+const isNativeAndroid = typeof window.AndroidBridge !== "undefined";
 let currentEmail = "";
 let messages = [];
 let selectedId = null;
 let viewMode = "text";
+let currentSegment = "all";
+let starredIds = new Set();
+let sessionHistory = [];
+
+function addHistory(eventText) {
+  const ts = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  sessionHistory.unshift({ ts, text: eventText });
+  if (sessionHistory.length > 30) sessionHistory.pop();
+  renderHistory();
+}
+
+function renderHistory() {
+  const el = document.getElementById("historyList");
+  if (!el) return;
+  if (sessionHistory.length === 0) return;
+  el.innerHTML = "";
+  for (const h of sessionHistory) {
+    const row = document.createElement("div");
+    row.className = "ios-list-row";
+    row.innerHTML = `<div class="row-label" style="font-size:0.86rem;"></div><div class="row-sub"></div>`;
+    row.querySelector(".row-label").textContent = h.text;
+    row.querySelector(".row-sub").textContent = h.ts;
+    el.appendChild(row);
+  }
+}
 
 function showToast(msg) {
   const t = document.getElementById("toast");
@@ -343,84 +924,204 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove("show"), 2400);
 }
 
+async function copyText(val, label) {
+  if (!val) return;
+  if (isNativeAndroid) {
+    window.AndroidBridge.copyText(val, label);
+    showToast(`Copied ${label}: ${val}`);
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(val);
+    showToast(`Copied ${label}: ${val}`);
+  } catch (e) {
+    await fetch("/api/copy", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({text: val})
+    });
+    showToast(`Copied ${label}: ${val}`);
+  }
+}
+
 function copyEmail() {
   if (!currentEmail || currentEmail.includes("...")) return;
-  if (window.AndroidBridge) {
-    window.AndroidBridge.copyText(currentEmail, "address");
-  }
+  copyText(currentEmail, "address");
 }
 
 function copyDetectedOtp() {
   const msg = messages.find(x => x.id === selectedId);
-  if (msg && msg.otp && window.AndroidBridge) {
-    window.AndroidBridge.copyText(msg.otp, "OTP");
-  }
+  if (msg && msg.otp) copyText(msg.otp, "OTP");
 }
 
-function enableKeepAlive() {
-  if (window.AndroidBridge) {
-    window.AndroidBridge.requestUnrestrictedBattery();
-  }
+function switchTab(tab) {
+  document.getElementById("tabInboxView").style.display = tab === "inbox" ? "block" : "none";
+  document.getElementById("tabGenerateView").style.display = tab === "generate" ? "block" : "none";
+  document.getElementById("tabHistoryView").style.display = tab === "history" ? "block" : "none";
+  document.getElementById("tabSettingsView").style.display = tab === "settings" ? "block" : "none";
+  document.getElementById("inboxSegments").style.display = tab === "inbox" ? "grid" : "none";
+
+  document.getElementById("navInbox").classList.toggle("active", tab === "inbox");
+  document.getElementById("navGenerate").classList.toggle("active", tab === "generate");
+  document.getElementById("navHistory").classList.toggle("active", tab === "history");
+  document.getElementById("navSettings").classList.toggle("active", tab === "settings");
 }
 
-function manualRefresh() {
-  const btn = document.getElementById("refreshBtn");
-  const icon = document.getElementById("refIcon");
-  btn.disabled = true;
-  icon.classList.add("spinning");
-  if (window.AndroidBridge) {
+function setFilterSegment(seg) {
+  currentSegment = seg;
+  document.getElementById("segAll").classList.toggle("active", seg === "all");
+  document.getElementById("segStarred").classList.toggle("active", seg === "starred");
+  document.getElementById("segOtp").classList.toggle("active", seg === "otp");
+  const titles = { all: "Inbox", starred: "Starred", otp: "Verification Codes" };
+  document.getElementById("sectionTitle").textContent = titles[seg] || "Inbox";
+  renderList();
+}
+
+function toggleStar(id, ev) {
+  ev.stopPropagation();
+  if (starredIds.has(id)) {
+    starredIds.delete(id);
+  } else {
+    starredIds.add(id);
+  }
+  renderList();
+}
+
+async function manualRefresh() {
+  const svg = document.getElementById("refSvg");
+  svg.classList.add("spinning");
+  if (isNativeAndroid) {
     window.AndroidBridge.refreshNow();
+    return;
+  }
+  try {
+    const r = await fetch("/api/refresh", { method: "POST" });
+    const d = await r.json();
+    await fetchState(true);
+    showToast(d.added > 0 ? `Received ${d.added} new email(s)` : "Up to date");
+  } catch (e) {
+    showToast("Refresh failed");
+  } finally {
+    svg.classList.remove("spinning");
   }
 }
 
 window.onRefreshComplete = function(ok, added, err) {
-  document.getElementById("refreshBtn").disabled = false;
-  document.getElementById("refIcon").classList.remove("spinning");
-  syncState(true);
+  document.getElementById("refSvg").classList.remove("spinning");
+  syncNativeState(true);
   if (ok) {
-    showToast(added > 0 ? `Received ${added} new email(s)!` : "Inbox is up to date");
+    showToast(added > 0 ? `Received ${added} new email(s)` : "Up to date");
   } else {
     showToast("Error: " + (err || "Failed"));
   }
 };
 
-function rotateEmail() {
-  const btn = document.getElementById("rotateBtn");
-  btn.disabled = true;
-  btn.textContent = "Deleting old...";
+async function rotateEmail() {
+  showToast("Deleting old address & creating new...");
   selectedId = null;
   closeReader();
-  if (window.AndroidBridge) {
+  if (isNativeAndroid) {
     window.AndroidBridge.rotateNewMail();
+    return;
+  }
+  try {
+    const r = await fetch("/api/rotate", { method: "POST" });
+    const d = await r.json();
+    if (d.ok) {
+      await fetchState(true);
+      addHistory("Generated " + d.email);
+      showToast("Old deleted! Copied: " + d.email);
+    } else {
+      showToast("Error: " + (d.error || "Failed"));
+    }
+  } catch (e) {
+    showToast("Network error");
   }
 }
 
 window.onRotateComplete = function(ok, emailOrErr, delCount) {
-  const btn = document.getElementById("rotateBtn");
-  btn.disabled = false;
-  btn.textContent = "🗑️+✨ New";
-  syncState(true);
+  syncNativeState(true);
   if (ok) {
-    showToast(`Old deleted! Copied: ${emailOrErr}`);
+    addHistory("Generated " + emailOrErr);
+    showToast("Old deleted! Copied: " + emailOrErr);
   } else {
     showToast("Error: " + emailOrErr);
   }
 };
 
-function deleteCurrentEmail() {
+async function deleteCurrentEmail() {
   if (!selectedId) return;
   const id = selectedId;
   selectedId = null;
   closeReader();
-  if (window.AndroidBridge) {
+  if (isNativeAndroid) {
     window.AndroidBridge.deleteEmail(id);
+    showToast("Deleted");
+    return;
   }
-  showToast("Email deleted");
+  await fetch("/api/delete_email", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({id})
+  });
+  showToast("Deleted");
+  await fetchState(true);
 }
 
-function exitApp() {
-  if (confirm("Delete current temp email address and stop background service?")) {
+function exportCurrentEmail() {
+  const msg = messages.find(x => x.id === selectedId);
+  if (!msg) return;
+  const content = `From: ${msg.from}\nTo: ${msg.to}\nDate: ${msg.date}\nSubject: ${msg.subject}\n\n${msg.textBody}`;
+  const blob = new Blob([content], {type: "text/plain;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = (msg.subject.replace(/[^a-z0-9]/gi, "_").slice(0, 40) || "email") + ".txt";
+  a.click();
+}
+
+function enableKeepAlive() {
+  if (isNativeAndroid) {
+    window.AndroidBridge.requestUnrestrictedBattery();
+  } else {
+    showToast("Termux wake-lock is active");
+  }
+}
+
+async function exitApp() {
+  if (!confirm("Delete this temporary email address and close the app?")) return;
+  if (isNativeAndroid) {
     window.AndroidBridge.exitAndCleanup();
+    return;
+  }
+  try { await fetch("/api/shutdown", { method: "POST" }); } catch (e) {}
+  document.body.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;padding:24px;text-align:center;gap:10px;"><h2>Address Deleted &amp; Stopped</h2><p style="color:#8e8e93;">Nothing was left behind.</p></div>`;
+}
+
+function pickAvatarInfo(msg) {
+  if (msg.otp) {
+    return { cls: "avatar-otp", label: "🔑" };
+  }
+  const s = (msg.from || "").toLowerCase();
+  if (s.includes("netflix") || s.includes("youtube") || s.includes("google")) {
+    return { cls: "avatar-red", label: (msg.from[0] || "M").toUpperCase() };
+  }
+  if (s.includes("github") || s.includes("discord") || s.includes("telegram")) {
+    return { cls: "avatar-blue", label: "✉️" };
+  }
+  if (s.includes("whatsapp") || s.includes("spotify") || s.includes("openai")) {
+    return { cls: "avatar-green", label: (msg.from[0] || "A").toUpperCase() };
+  }
+  return { cls: "avatar-orange", label: (msg.from.replace(/[^a-zA-Z]/g, "")[0] || "✉️").toUpperCase() };
+}
+
+function formatShortTime(iso) {
+  if (!iso || iso === "-") return "";
+  try {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso.slice(11, 16) || iso;
+    return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  } catch (e) {
+    return "";
   }
 }
 
@@ -428,51 +1129,75 @@ function renderList() {
   const listEl = document.getElementById("msgList");
   const emptyEl = document.getElementById("inboxEmpty");
   const q = (document.getElementById("searchInput").value || "").toLowerCase().trim();
-  const filtered = messages.filter(m =>
-    !q ||
-    m.from.toLowerCase().includes(q) ||
-    m.subject.toLowerCase().includes(q) ||
-    m.textBody.toLowerCase().includes(q) ||
-    (m.otp && m.otp.includes(q))
-  );
 
-  document.getElementById("msgCount").textContent = messages.length;
+  const filtered = messages.filter(m => {
+    if (currentSegment === "starred" && !starredIds.has(m.id)) return false;
+    if (currentSegment === "otp" && !m.otp) return false;
+    if (!q) return true;
+    return (
+      m.from.toLowerCase().includes(q) ||
+      m.subject.toLowerCase().includes(q) ||
+      m.textBody.toLowerCase().includes(q) ||
+      (m.otp && m.otp.includes(q))
+    );
+  });
+
+  document.getElementById("msgCount").textContent =
+    filtered.length + (filtered.length === 1 ? " message" : " messages");
+
   if (filtered.length === 0) {
     listEl.style.display = "none";
     emptyEl.style.display = "flex";
     return;
   }
-  listEl.style.display = "block";
+  listEl.style.display = "flex";
   emptyEl.style.display = "none";
   listEl.innerHTML = "";
+
   for (const m of filtered) {
-    const li = document.createElement("li");
-    li.className = "msg-item";
-    li.onclick = () => selectMessage(m.id);
-    li.innerHTML = `
-      <div class="msg-from"><span></span><span class="msg-time"></span></div>
-      <div class="msg-subj"></div>
-      <div class="msg-prev"></div>
+    const card = document.createElement("div");
+    card.className = "msg-card";
+    card.onclick = () => selectMessage(m.id);
+
+    const av = pickAvatarInfo(m);
+    const isStarred = starredIds.has(m.id);
+
+    card.innerHTML = `
+      <div class="avatar-squircle ${av.cls}">${av.label}</div>
+      <div class="msg-content">
+        <div class="msg-top-line">
+          <div class="msg-sender"></div>
+          <div class="msg-meta-right">
+            <span class="msg-time"></span>
+            <button class="star-btn ${isStarred ? 'starred' : ''}">${isStarred ? '★' : '☆'}</button>
+          </div>
+        </div>
+        <div class="msg-subject"></div>
+        <div class="msg-preview"></div>
+        <div class="otp-slot"></div>
+      </div>
     `;
-    li.querySelector(".msg-from span:first-child").textContent = m.from;
-    li.querySelector(".msg-time").textContent = m.date.slice(11, 19) || m.date;
-    li.querySelector(".msg-subj").textContent = (m.hasAttachment ? "📎 " : "") + m.subject;
-    li.querySelector(".msg-prev").textContent = m.preview;
+
+    card.querySelector(".msg-sender").textContent = m.otp ? `🔑 OTP` : m.from;
+    card.querySelector(".msg-time").textContent = formatShortTime(m.date);
+    card.querySelector(".star-btn").onclick = (ev) => toggleStar(m.id, ev);
+    card.querySelector(".msg-subject").textContent = m.otp
+      ? `${m.otp} • ${m.subject}`
+      : (m.hasAttachment ? "📎 " : "") + m.subject;
+    card.querySelector(".msg-preview").textContent = m.preview;
 
     if (m.otp) {
-      const otpRow = document.createElement("div");
-      otpRow.className = "otp-row";
       const chip = document.createElement("button");
-      chip.className = "otp-chip";
-      chip.textContent = "🔑 Copy OTP: " + m.otp;
+      chip.className = "otp-action-chip";
+      chip.textContent = "📋 Copy OTP";
       chip.onclick = (ev) => {
         ev.stopPropagation();
-        window.AndroidBridge.copyText(m.otp, "OTP");
+        copyText(m.otp, "OTP");
       };
-      otpRow.appendChild(chip);
-      li.appendChild(otpRow);
+      card.querySelector(".otp-slot").appendChild(chip);
     }
-    listEl.appendChild(li);
+
+    listEl.appendChild(card);
   }
 }
 
@@ -480,7 +1205,7 @@ function selectMessage(id) {
   selectedId = id;
   const msg = messages.find(x => x.id === id);
   if (!msg) return;
-  document.getElementById("mainGrid").classList.add("reading");
+
   document.getElementById("rSubj").textContent = msg.subject;
   document.getElementById("rFrom").textContent = msg.from;
   document.getElementById("rTo").textContent = msg.to;
@@ -491,9 +1216,9 @@ function selectMessage(id) {
   const verifyLink = document.getElementById("rVerifyLink");
   if (msg.otp || msg.verifyLink) {
     otpBanner.style.display = "flex";
-    document.getElementById("rOtpValue").textContent = msg.otp || "Link";
+    document.getElementById("rOtpValue").textContent = msg.otp || "Verification Link";
     if (msg.verifyLink) {
-      verifyLink.style.display = "inline";
+      verifyLink.style.display = "inline-flex";
       verifyLink.href = msg.verifyLink;
     } else {
       verifyLink.style.display = "none";
@@ -502,19 +1227,38 @@ function selectMessage(id) {
     otpBanner.style.display = "none";
   }
 
+  const attBox = document.getElementById("rAttachments");
+  const atts = msg.attachments || [];
+  if (!isNativeAndroid && atts.length > 0) {
+    attBox.style.display = "flex";
+    attBox.innerHTML = "";
+    for (const a of atts) {
+      const link = document.createElement("a");
+      link.className = "ios-pill-btn";
+      link.style.textDecoration = "none";
+      link.href = `/api/attachment/${encodeURIComponent(a.blobId)}/${encodeURIComponent(a.name)}`;
+      link.download = a.name;
+      link.textContent = `📎 ${a.name}`;
+      attBox.appendChild(link);
+    }
+  } else {
+    attBox.style.display = "none";
+  }
+
   const htmlTab = document.getElementById("tabHtml");
   if (msg.htmlBody) {
-    htmlTab.style.display = "inline-flex";
+    htmlTab.style.display = "block";
     document.getElementById("rHtmlFrame").srcdoc = msg.htmlBody;
   } else {
     htmlTab.style.display = "none";
     setMode("text");
   }
   updateBodyVisibility();
+  document.getElementById("readerSheet").classList.add("open");
 }
 
 function closeReader() {
-  document.getElementById("mainGrid").classList.remove("reading");
+  document.getElementById("readerSheet").classList.remove("open");
 }
 
 function setMode(m) {
@@ -531,11 +1275,28 @@ function updateBodyVisibility() {
 }
 
 function applyStateObj(d, force = false) {
-  currentEmail = d.email;
-  document.getElementById("emailBox").textContent = d.email;
-  document.getElementById("statusText").textContent = d.error ? d.error : d.status;
-  document.getElementById("lastChecked").textContent = d.lastChecked && d.lastChecked !== "-" ? `• ${d.lastChecked}` : "";
-  document.getElementById("dot").className = d.error ? "dot err" : "dot";
+  if (d.email && d.email !== currentEmail && !d.email.includes("...")) {
+    if (sessionHistory.length === 0) {
+      addHistory("Active address: " + d.email);
+    }
+  }
+  currentEmail = d.email || "Initializing...";
+  document.getElementById("emailBox").textContent = currentEmail;
+  document.getElementById("genCurrentEmail").textContent = currentEmail;
+
+  const pill = document.getElementById("statusPill");
+  const statusEl = document.getElementById("statusText");
+  if (d.error) {
+    pill.classList.add("err");
+    statusEl.textContent = d.error;
+  } else {
+    pill.classList.remove("err");
+    statusEl.textContent = d.status === "Watching inbox live" ? "Watching Live" : (d.status || "Watching Live");
+  }
+
+  document.getElementById("lastChecked").textContent =
+    d.lastChecked && d.lastChecked !== "-" ? `Synced ${d.lastChecked}` : "";
+
   const prevLen = messages.length;
   messages = d.messages || [];
   if (force || messages.length !== prevLen) {
@@ -547,19 +1308,60 @@ window.onNativePush = function(event, rawJson) {
   try {
     const d = JSON.parse(rawJson);
     applyStateObj(d, true);
+    if (event === "new_mail" && d.messages && d.messages[0]) {
+      const m = d.messages[0];
+      addHistory(m.otp ? `OTP ${m.otp} from ${m.from}` : `Mail from ${m.from}`);
+    }
   } catch (e) {}
 };
 
-function syncState(force = false) {
-  if (!window.AndroidBridge) return;
+function syncNativeState(force = false) {
+  if (!isNativeAndroid) return;
   try {
     const d = JSON.parse(window.AndroidBridge.getState());
     applyStateObj(d, force);
   } catch (e) {}
 }
 
-setInterval(() => syncState(false), 2000);
-syncState(true);
+async function fetchState(force = false) {
+  if (isNativeAndroid) {
+    syncNativeState(force);
+    return;
+  }
+  try {
+    const r = await fetch("/api/state");
+    const d = await r.json();
+    applyStateObj(d, force);
+  } catch (e) {}
+}
+
+function connectSSE() {
+  if (isNativeAndroid || !window.EventSource) return;
+  const es = new EventSource("/api/events");
+  es.addEventListener("state", (ev) => {
+    try { applyStateObj(JSON.parse(ev.data), true); } catch (e) {}
+  });
+  es.addEventListener("new_mail", (ev) => {
+    try {
+      const d = JSON.parse(ev.data);
+      applyStateObj(d, true);
+      const newest = (d.messages || [])[0];
+      if (newest) {
+        addHistory(newest.otp ? `OTP ${newest.otp} from ${newest.from}` : `Mail from ${newest.from}`);
+        showToast(newest.otp ? `🔑 Auto-copied OTP: ${newest.otp}` : `New Mail: ${newest.subject}`);
+      }
+    } catch (e) {}
+  });
+}
+
+if (isNativeAndroid) {
+  syncNativeState(true);
+  setInterval(() => syncNativeState(false), 2000);
+} else {
+  fetchState(true);
+  connectSSE();
+  setInterval(() => fetchState(false), 3000);
+}
 </script>
 </body>
 </html>

@@ -1,0 +1,69 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Stylized "Q" Outer Ring on Right -->
+    <path
+        android:pathData="M58,31 A23,23 0 1,1 58,77 L54,77 L54,70 L58,70 A16,16 0 1,0 58,38 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="54"
+                android:startY="31"
+                android:endX="81"
+                android:endY="77"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#60A5FA" />
+                <item android:offset="1.0" android:color="#818CF8" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <!-- Q Tail -->
+    <path
+        android:fillColor="#818CF8"
+        android:pathData="M62,65 L77,80 L71,84 L57,70 Z" />
+
+    <!-- Frosted Glass Envelope Body on Left -->
+    <path
+        android:strokeWidth="2.2"
+        android:strokeColor="#93C5FD"
+        android:pathData="M29,39h32c2.8,0 5,2.2 5,5v20c0,2.8 -2.2,5 -5,5H29c-2.8,0 -5,-2.2 -5,-5V44C24,41.2 26.2,39 29,39z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="24"
+                android:startY="39"
+                android:endX="66"
+                android:endY="69"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#CC1E3A8A" />
+                <item android:offset="1.0" android:color="#CC312E81" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <!-- Envelope Flap Lines -->
+    <path
+        android:strokeWidth="2.2"
+        android:strokeColor="#BAE6FD"
+        android:fillColor="#00000000"
+        android:pathData="M25,41 L45,55 L65,41" />
+
+    <!-- Electric Cyan-Blue Lightning Bolt Centerpiece -->
+    <path
+        android:strokeWidth="1.5"
+        android:strokeColor="#E0F2FE"
+        android:pathData="M64,22 L42,53 L54,53 L43,85 L69,50 L56,50 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="42"
+                android:startY="22"
+                android:endX="69"
+                android:endY="85"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#7DD3FC" />
+                <item android:offset="0.5" android:color="#38BDF8" />
+                <item android:offset="1.0" android:color="#2563EB" />
+            </gradient>
+        </aapt:attr>
+    </path>
+</vector>
