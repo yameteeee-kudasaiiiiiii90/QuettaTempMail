@@ -9,6 +9,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
@@ -69,7 +70,15 @@ class QuettaMailService : Service() {
         super.onCreate()
         createNotificationChannels()
         acquireLocks()
-        startForeground(NOTIF_ID_SERVICE, buildForegroundNotification())
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(
+                NOTIF_ID_SERVICE,
+                buildForegroundNotification(),
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            )
+        } else {
+            startForeground(NOTIF_ID_SERVICE, buildForegroundNotification())
+        }
         registerNetworkCallback()
         startBackgroundLoop()
     }
@@ -139,8 +148,9 @@ class QuettaMailService : Service() {
             try {
                 val added = apiClient.pollOnce()
                 for (em in added) {
-                    if (!em.otp.isNullOrBlank()) {
-                        copyToClipboard(em.otp, "🔑 Auto-copied OTP: ${em.otp}")
+                    val otpCode = em.otp
+                    if (!otpCode.isNullOrBlank()) {
+                        copyToClipboard(otpCode, "🔑 Auto-copied OTP: $otpCode")
                     }
                     sendIncomingMailNotification(em)
                 }
@@ -160,8 +170,9 @@ class QuettaMailService : Service() {
             try {
                 val added = apiClient.pollOnce()
                 for (em in added) {
-                    if (!em.otp.isNullOrBlank()) {
-                        copyToClipboard(em.otp, "🔑 Auto-copied OTP: ${em.otp}")
+                    val otpCode = em.otp
+                    if (!otpCode.isNullOrBlank()) {
+                        copyToClipboard(otpCode, "🔑 Auto-copied OTP: $otpCode")
                     }
                     sendIncomingMailNotification(em)
                 }
@@ -214,13 +225,13 @@ class QuettaMailService : Service() {
             val req = NetworkRequest.Builder()
                 .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
                 .build()
-            networkCallback = object : ConnectivityManager.NetworkCallback() {
+            val cb = object : ConnectivityManager.NetworkCallback() {
                 override fun onAvailable(network: Network) {
-                    // Immediately poll when network comes back online
                     triggerImmediateRefresh()
                 }
             }
-            connectivityManager?.registerNetworkCallback(req, networkCallback!!)
+            networkCallback = cb
+            connectivityManager?.registerNetworkCallback(req, cb)
         } catch (_: Exception) {}
     }
 
@@ -309,33 +320,34 @@ class QuettaMailService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val title = if (!em.otp.isNullOrBlank()) {
-            "🔑 OTP ${em.otp} • ${em.subject.take(60)}"
+        val otpCode = em.otp
+        val title = if (!otpCode.isNullOrBlank()) {
+            "🔑 OTP $otpCode • ${em.subject.take(60)}"
         } else {
             "📧 ${em.subject.take(80)}"
         }
+
+        val expandedBody = "From: ${em.from}\n\n${em.preview}"
 
         val builder = NotificationCompat.Builder(this, CHANNEL_ALERTS)
             .setSmallIcon(R.drawable.ic_launcher)
             .setContentTitle(title)
             .setContentText("From: ${em.from.take(100)}")
-            .setStyle(NotificationCompat.BigTextStyle().bigText("From: ${em.from}
-
-${em.preview}"))
+            .setStyle(NotificationCompat.BigTextStyle().bigText(expandedBody))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setContentIntent(openPi)
 
-        if (!em.otp.isNullOrBlank()) {
+        if (!otpCode.isNullOrBlank()) {
             val otpIntent = Intent(this, QuettaMailService::class.java).apply {
                 action = ACTION_COPY_OTP
-                putExtra(EXTRA_OTP, em.otp)
+                putExtra(EXTRA_OTP, otpCode)
             }
             val otpPi = PendingIntent.getService(
                 this, alertNotifId, otpIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-            builder.addAction(0, "Copy OTP (${em.otp})", otpPi)
+            builder.addAction(0, "Copy OTP ($otpCode)", otpPi)
         }
 
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -351,7 +363,7 @@ ${em.preview}"))
                 "QuettaTempMail::BackgroundServiceWakeLock"
             ).apply {
                 setReferenceCounted(false)
-                acquire(4 * 60 * 60 * 1000L) // 4 hours safety ceiling
+                acquire(4 * 60 * 60 * 1000L)
             }
         } catch (_: Exception) {}
 

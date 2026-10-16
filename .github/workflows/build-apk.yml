@@ -1,4 +1,4 @@
-name: Build Quetta Temp Mail APK (v3)
+name: Build Quetta Temp Mail APK
 
 on:
   push:

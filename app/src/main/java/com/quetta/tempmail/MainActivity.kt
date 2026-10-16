@@ -74,7 +74,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(webView)
         webView.loadUrl("file:///android_asset/index.html")
 
-        // Start & bind the persistent Foreground Service
         val serviceIntent = Intent(this, QuettaMailService::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(serviceIntent)
@@ -87,7 +86,7 @@ class MainActivity : AppCompatActivity() {
     private fun pushStateToWebView(event: String, stateJson: String?) {
         if (stateJson == null) return
         val escaped = JSONObject.quote(stateJson)
-        webView. evaluateJavascript("window.onNativePush && window.onNativePush('$event', $escaped);", null)
+        webView.evaluateJavascript("window.onNativePush && window.onNativePush('$event', $escaped);", null)
     }
 
     inner class NativeBridge {
