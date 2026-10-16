@@ -57,13 +57,13 @@ class QuettaMailService : Service() {
     private var connectivityManager: ConnectivityManager? = null
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
 
-    private var uiListener: ((String, String?) -> Unit)? = null
+    private var stateListener: (() -> Unit)? = null
     private var alertNotifId = 200
     @Volatile private var isStopping = false
 
     val apiClient = QuettaApiClient {
         updateForegroundNotification()
-        notifyUi("state", null)
+        mainHandler.post { stateListener?.invoke() }
     }
 
     override fun onCreate() {
@@ -98,7 +98,7 @@ class QuettaMailService : Service() {
                 }
             }
             ACTION_REFRESH_NOW -> {
-                triggerImmediateRefresh()
+                triggerImmediateRefresh(null)
             }
             ACTION_ROTATE_NEW -> {
                 bgExecutor.execute {
@@ -109,7 +109,7 @@ class QuettaMailService : Service() {
                 }
             }
             ACTION_STOP_SERVICE -> {
-                shutdownAndExit()
+                shutdownAndExit(null)
             }
         }
         return START_STICKY
@@ -117,15 +117,8 @@ class QuettaMailService : Service() {
 
     override fun onBind(intent: Intent?): IBinder = binder
 
-    fun setUiListener(listener: ((String, String?) -> Unit)?) {
-        uiListener = listener
-    }
-
-    private fun notifyUi(event: String, extra: String?) {
-        val stateJson = apiClient.getStateJson()
-        mainHandler.post {
-            uiListener?.invoke(event, stateJson)
-        }
+    fun setStateListener(listener: (() -> Unit)?) {
+        stateListener = listener
     }
 
     private fun startBackgroundLoop() {
@@ -153,9 +146,6 @@ class QuettaMailService : Service() {
                         copyToClipboard(otpCode, "🔑 Auto-copied OTP: $otpCode")
                     }
                     sendIncomingMailNotification(em)
-                }
-                if (added.isNotEmpty()) {
-                    notifyUi("new_mail", null)
                 }
             } catch (_: Exception) {
                 val fails = apiClient.consecutiveFailures
@@ -227,7 +217,7 @@ class QuettaMailService : Service() {
                 .build()
             val cb = object : ConnectivityManager.NetworkCallback() {
                 override fun onAvailable(network: Network) {
-                    triggerImmediateRefresh()
+                    triggerImmediateRefresh(null)
                 }
             }
             networkCallback = cb

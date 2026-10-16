@@ -4,7 +4,6 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Stylized "Q" Outer Ring on Right -->
     <path
         android:pathData="M58,31 A23,23 0 1,1 58,77 L54,77 L54,70 L58,70 A16,16 0 1,0 58,38 Z">
         <aapt:attr name="android:fillColor">
@@ -19,12 +18,9 @@
             </gradient>
         </aapt:attr>
     </path>
-    <!-- Q Tail -->
     <path
         android:fillColor="#818CF8"
         android:pathData="M62,65 L77,80 L71,84 L57,70 Z" />
-
-    <!-- Frosted Glass Envelope Body on Left -->
     <path
         android:strokeWidth="2.2"
         android:strokeColor="#93C5FD"
@@ -41,14 +37,11 @@
             </gradient>
         </aapt:attr>
     </path>
-    <!-- Envelope Flap Lines -->
     <path
         android:strokeWidth="2.2"
         android:strokeColor="#BAE6FD"
         android:fillColor="#00000000"
         android:pathData="M25,41 L45,55 L65,41" />
-
-    <!-- Electric Cyan-Blue Lightning Bolt Centerpiece -->
     <path
         android:strokeWidth="1.5"
         android:strokeColor="#E0F2FE"

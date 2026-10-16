@@ -18,8 +18,4 @@
             </gradient>
         </aapt:attr>
     </path>
-    <!-- Subtle inner glow -->
-    <path
-        android:fillColor="#1A38BDF8"
-        android:pathData="M54,54m-38,0a38,38 0,1 1,76 0a38,38 0,1 1,-76 0" />
 </vector>

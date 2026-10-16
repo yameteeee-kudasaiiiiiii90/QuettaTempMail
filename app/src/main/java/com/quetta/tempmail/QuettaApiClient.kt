@@ -51,7 +51,7 @@ class QuettaApiClient(private val onStateChanged: (() -> Unit)? = null) {
         )
         private val OTP_CANDIDATE = Pattern.compile("(?<![0-9A-Za-z#])(\\d{4,8})(?![0-9A-Za-z])")
         private val VERIFY_LINK_RE = Pattern.compile(
-            "https?://[^\\s<>\"']+(?:verify|confirm|token|auth|activate|magic|login|code=)[^\\s<>\"']*",
+            "https?://[^\\s<>"']+(?:verify|confirm|token|auth|activate|magic|login|code=)[^\\s<>"']*",
             Pattern.CASE_INSENSITIVE
         )
     }
@@ -80,6 +80,7 @@ class QuettaApiClient(private val onStateChanged: (() -> Unit)? = null) {
     }
 
     fun getMessageCount(): Int = synchronized(lock) { messages.size }
+    fun getMessages(): List<EmailMessage> = synchronized(lock) { ArrayList(messages) }
 
     private fun http(
         method: String,
@@ -132,10 +133,6 @@ class QuettaApiClient(private val onStateChanged: (() -> Unit)? = null) {
         return code in listOf(200, 202, 204)
     }
 
-    /**
-     * Explicitly deletes the active address + any leftover addresses on the account
-     * before creating a brand-new address.
-     */
     fun deleteOldAndCreateNew(): Triple<Boolean, String, Int> {
         synchronized(lock) {
             status = "Deleting old address & creating new..."
@@ -541,48 +538,6 @@ class QuettaApiClient(private val onStateChanged: (() -> Unit)? = null) {
                 notifyStateChanged()
                 throw e
             }
-        }
-    }
-
-    fun getStateJson(): String {
-        synchronized(lock) {
-            val obj = JSONObject()
-            obj.put("email", email)
-            obj.put("status", status)
-            obj.put("lastChecked", lastChecked)
-            obj.put("error", error ?: JSONObject.NULL)
-            val arr = JSONArray()
-            for (m in messages) {
-                val attArr = JSONArray()
-                for (a in m.attachments) {
-                    attArr.put(
-                        JSONObject().apply {
-                            put("blobId", a.blobId)
-                            put("name", a.name)
-                            put("type", a.type)
-                            put("size", a.size)
-                        }
-                    )
-                }
-                arr.put(
-                    JSONObject().apply {
-                        put("id", m.id)
-                        put("from", m.from)
-                        put("to", m.to)
-                        put("subject", m.subject)
-                        put("preview", m.preview)
-                        put("date", m.date)
-                        put("hasAttachment", m.hasAttachment)
-                        put("attachments", attArr)
-                        put("otp", m.otp ?: JSONObject.NULL)
-                        put("verifyLink", m.verifyLink ?: JSONObject.NULL)
-                        put("textBody", m.textBody)
-                        put("htmlBody", m.htmlBody)
-                    }
-                )
-            }
-            obj.put("messages", arr)
-            return obj.toString()
         }
     }
 }
