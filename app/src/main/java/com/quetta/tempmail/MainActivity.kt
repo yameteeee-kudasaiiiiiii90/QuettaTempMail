@@ -2,162 +2,155 @@ package com.quetta.tempmail
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.content.ClipData
-import android.content.ClipboardManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.IBinder
 import android.os.PowerManager
+import android.provider.Settings
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import org.json.JSONObject
-import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledExecutorService
-import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
-    private val apiClient = QuettaApiClient()
-    private var scheduler: ScheduledExecutorService? = null
-    private val bgExecutor = Executors.newCachedThreadPool()
-    private var wakeLock: PowerManager.WakeLock? = null
-    private var notifIdCounter = 100
+    private var mailService: QuettaMailService? = null
+    private var isBound = false
 
-    companion object {
-        private const val CHANNEL_ID = "quetta_mail_alerts"
+    private val connection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val binder = service as QuettaMailService.LocalBinder
+            mailService = binder.getService()
+            isBound = true
+            mailService?.setUiListener { event, stateJson ->
+                pushStateToWebView(event, stateJson)
+            }
+            pushStateToWebView("state", mailService?.apiClient?.getStateJson())
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            isBound = false
+            mailService = null
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setupNotifications()
-        acquireWakeLock()
+        requestNotificationPermissionIfNeeded()
 
         webView = WebView(this).apply {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
-            webViewClient = WebViewClient()
+            webViewClient = object : WebViewClient() {
+                override fun shouldOverrideUrlLoading(
+                    view: WebView?,
+                    request: WebResourceRequest?
+                ): Boolean {
+                    val url = request?.url?.toString() ?: return false
+                    if (url.startsWith("http://") || url.startsWith("https://")) {
+                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                        return true
+                    }
+                    return false
+                }
+            }
             webChromeClient = WebChromeClient()
             addJavascriptInterface(NativeBridge(), "AndroidBridge")
         }
         setContentView(webView)
         webView.loadUrl("file:///android_asset/index.html")
 
-        startBackgroundPoller()
+        // Start & bind the persistent Foreground Service
+        val serviceIntent = Intent(this, QuettaMailService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
+        }
+        bindService(serviceIntent, connection, Context.BIND_AUTO_CREATE)
     }
 
-    private fun startBackgroundPoller() {
-        scheduler = Executors.newSingleThreadScheduledExecutor()
-        // Initial address rotation (deletes old addresses, creates new one)
-        bgExecutor.execute {
-            val (ok, newEmail, _) = apiClient.deleteOldAndCreateNew()
-            if (ok) {
-                copyToClipboardInternal(newEmail, silent = true)
-            }
-        }
-        // Poll every 2 seconds
-        scheduler?.scheduleWithFixedDelay({
-            try {
-                val newEmails = apiClient.pollOnce()
-                for (em in newEmails) {
-                    sendNewMailNotification(em.subject, em.from)
-                }
-            } catch (_: Exception) {}
-        }, 2, 2, TimeUnit.SECONDS)
+    private fun pushStateToWebView(event: String, stateJson: String?) {
+        if (stateJson == null) return
+        val escaped = JSONObject.quote(stateJson)
+        webView. evaluateJavascript("window.onNativePush && window.onNativePush('$event', $escaped);", null)
     }
 
     inner class NativeBridge {
         @JavascriptInterface
         fun getState(): String {
-            return apiClient.getStateJson()
+            return mailService?.apiClient?.getStateJson()
+                ?: JSONObject().put("email", "Starting service...").put("status", "Connecting...").toString()
         }
 
         @JavascriptInterface
-        fun copyEmail(email: String) {
-            copyToClipboardInternal(email, silent = false)
+        fun copyText(text: String, label: String) {
+            mailService?.copyToClipboard(text, "Copied $label: $text")
         }
 
         @JavascriptInterface
-        fun refreshNow(): String {
-            return try {
-                val added = apiClient.pollOnce()
-                for (em in added) {
-                    sendNewMailNotification(em.subject, em.from)
+        fun refreshNow() {
+            mailService?.triggerImmediateRefresh { added, err ->
+                val script = if (err != null) {
+                    "window.onRefreshComplete && window.onRefreshComplete(false, 0, ${JSONObject.quote(err)});"
+                } else {
+                    "window.onRefreshComplete && window.onRefreshComplete(true, $added, null);"
                 }
-                JSONObject().apply {
-                    put("ok", true)
-                    put("added", added.size)
-                }.toString()
-            } catch (e: Exception) {
-                JSONObject().apply {
-                    put("ok", false)
-                    put("error", e.message ?: "Refresh error")
-                }.toString()
+                webView.evaluateJavascript(script, null)
             }
         }
 
         @JavascriptInterface
-        fun rotateNewMail(): String {
-            val (ok, msg, deletedCount) = apiClient.deleteOldAndCreateNew()
-            if (ok) {
-                copyToClipboardInternal(msg, silent = true)
+        fun rotateNewMail() {
+            mailService?.triggerRotateNewMail { ok, emailOrErr, delCount ->
+                val script = "window.onRotateComplete && window.onRotateComplete($ok, ${JSONObject.quote(emailOrErr)}, $delCount);"
+                webView.evaluateJavascript(script, null)
             }
-            return JSONObject().apply {
-                put("ok", ok)
-                put("email", if (ok) msg else "")
-                put("deletedCount", deletedCount)
-                put("error", if (ok) JSONObject.NULL else msg)
-            }.toString()
+        }
+
+        @JavascriptInterface
+        fun deleteEmail(emailId: String) {
+            mailService?.apiClient?.deleteSingleMessage(emailId)
+        }
+
+        @JavascriptInterface
+        fun requestUnrestrictedBattery() {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                try {
+                    val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+                    if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                        val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                            data = Uri.parse("package:$packageName")
+                        }
+                        startActivity(intent)
+                    }
+                } catch (_: Exception) {}
+            }
         }
 
         @JavascriptInterface
         fun exitAndCleanup() {
-            bgExecutor.execute {
-                apiClient.cleanupCurrent()
-                runOnUiThread {
-                    releaseWakeLock()
-                    finishAndRemoveTask()
-                }
+            mailService?.shutdownAndExit {
+                finishAndRemoveTask()
             }
         }
     }
 
-    private fun copyToClipboardInternal(text: String, silent: Boolean) {
-        runOnUiThread {
-            val cm = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            cm.setPrimaryClip(ClipData.newPlainText("Quetta Temp Email", text))
-            if (!silent) {
-                Toast.makeText(this, "Copied: $text", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    private fun setupNotifications() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val chan = NotificationChannel(
-                CHANNEL_ID,
-                "Incoming Temp Mail",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "Notifications when new temporary emails arrive"
-            }
-            val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            nm.createNotificationChannel(chan)
-        }
+    private fun requestNotificationPermissionIfNeeded() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                 != PackageManager.PERMISSION_GRANTED
@@ -171,51 +164,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun sendNewMailNotification(subject: String, sender: String) {
-        val intent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
-        }
-        val pi = PendingIntent.getActivity(
-            this,
-            0,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        val notif = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher)
-            .setContentTitle("📧 ${subject.take(80)}")
-            .setContentText("From: ${sender.take(120)}")
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setAutoCancel(true)
-            .setContentIntent(pi)
-            .build()
-
-        val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        nm.notify(notifIdCounter++, notif)
-    }
-
-    private fun acquireWakeLock() {
-        try {
-            val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
-            wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "QuettaTempMail::InboxPollWakeLock")
-            wakeLock?.acquire(60 * 60 * 1000L) // 1 hour max safety timeout
-        } catch (_: Exception) {}
-    }
-
-    private fun releaseWakeLock() {
-        try {
-            if (wakeLock?.isHeld == true) {
-                wakeLock?.release()
-            }
-        } catch (_: Exception) {}
-    }
-
     override fun onDestroy() {
-        scheduler?.shutdownNow()
-        Thread {
-            apiClient.cleanupCurrent()
-        }.start()
-        releaseWakeLock()
+        if (isBound) {
+            mailService?.setUiListener(null)
+            unbindService(connection)
+            isBound = false
+        }
         super.onDestroy()
     }
 }

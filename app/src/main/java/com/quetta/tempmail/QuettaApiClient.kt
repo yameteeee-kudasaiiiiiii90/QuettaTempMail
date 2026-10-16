@@ -8,6 +8,17 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.regex.Pattern
+
+data class AttachmentItem(
+    val blobId: String,
+    val name: String,
+    val type: String,
+    val size: Long
+)
 
 data class EmailMessage(
     val id: String,
@@ -17,11 +28,14 @@ data class EmailMessage(
     val preview: String,
     val date: String,
     val hasAttachment: Boolean,
+    val attachments: List<AttachmentItem>,
+    val otp: String?,
+    val verifyLink: String?,
     val textBody: String,
     val htmlBody: String
 )
 
-class QuettaApiClient {
+class QuettaApiClient(private val onStateChanged: (() -> Unit)? = null) {
 
     companion object {
         private const val MASTER_TOKEN = "qt_E_SUl1WhhRkNHIElYiyEwJeJbaLPKYKjXWnR1nfuA8g8xM-WfKs2A-Bj9KjdiFJ_CX3RJlX4rV5H_KCPSmEld_NqKXx3vNCCgsyjId3xPKA="
@@ -30,6 +44,16 @@ class QuettaApiClient {
         private const val API_JMAP = "https://mx.quetta.email/jmap/"
         private const val UA = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Mobile Safari/537.36"
         private const val QUETTA_HDR = "android/Quetta/5877"
+
+        private val OTP_KEYWORDS = Pattern.compile(
+            "\\b(code|otp|verification|verify|pin|passcode|token|security|confirm|login|auth)\\b",
+            Pattern.CASE_INSENSITIVE
+        )
+        private val OTP_CANDIDATE = Pattern.compile("(?<![0-9A-Za-z#])(\\d{4,8})(?![0-9A-Za-z])")
+        private val VERIFY_LINK_RE = Pattern.compile(
+            "https?://[^\\s<>\"']+(?:verify|confirm|token|auth|activate|magic|login|code=)[^\\s<>\"']*",
+            Pattern.CASE_INSENSITIVE
+        )
     }
 
     private val lock = Any()
@@ -41,10 +65,21 @@ class QuettaApiClient {
     @Volatile var mboxId: String = "c"
     @Volatile var status: String = "Starting up..."
     @Volatile var error: String? = null
+    @Volatile var lastChecked: String = "-"
+    @Volatile var consecutiveFailures: Int = 0
     @Volatile var deleted: Boolean = false
 
     private val seenIds = mutableSetOf<String>()
     private val messages = mutableListOf<EmailMessage>()
+
+    private fun nowTimeStr(): String =
+        SimpleDateFormat("HH:mm:ss", Locale.US).format(Date())
+
+    private fun notifyStateChanged() {
+        onStateChanged?.invoke()
+    }
+
+    fun getMessageCount(): Int = synchronized(lock) { messages.size }
 
     private fun http(
         method: String,
@@ -57,9 +92,10 @@ class QuettaApiClient {
             val url = URL(urlStr)
             conn = (url.openConnection() as HttpURLConnection).apply {
                 requestMethod = method
-                connectTimeout = 25000
-                readTimeout = 25000
+                connectTimeout = 20000
+                readTimeout = 20000
                 setRequestProperty("User-Agent", UA)
+                setRequestProperty("Connection", "keep-alive")
                 for ((k, v) in headers) {
                     setRequestProperty(k, v)
                 }
@@ -105,6 +141,8 @@ class QuettaApiClient {
             status = "Deleting old address & creating new..."
             error = null
         }
+        notifyStateChanged()
+
         var deletedCount = 0
         val oldAid: String?
         synchronized(lock) {
@@ -118,7 +156,6 @@ class QuettaApiClient {
             }
         }
 
-        // Also sweep any other remote addresses on the account
         val (listCode, listRaw) = http("GET", API_MAILBOXES, mailboxHeaders())
         if (listCode == 200 && listRaw.startsWith("[")) {
             try {
@@ -135,7 +172,6 @@ class QuettaApiClient {
             } catch (_: Exception) {}
         }
 
-        // Create brand-new mailbox
         val (postCode, postRaw) = http("POST", API_MAILBOXES, mailboxHeaders(), "{}")
         if (postCode != 201) {
             val errMsg = "Could not create address (HTTP $postCode)"
@@ -143,6 +179,7 @@ class QuettaApiClient {
                 error = errMsg
                 status = "Error creating address"
             }
+            notifyStateChanged()
             return Triple(false, errMsg, deletedCount)
         }
 
@@ -157,6 +194,7 @@ class QuettaApiClient {
                 email = newEmail
                 token = newToken
                 deleted = false
+                consecutiveFailures = 0
                 seenIds.clear()
                 messages.clear()
             }
@@ -165,8 +203,10 @@ class QuettaApiClient {
             synchronized(lock) {
                 mboxId = resolvedMbox
                 status = "Watching inbox live"
+                lastChecked = nowTimeStr()
                 error = null
             }
+            notifyStateChanged()
             Triple(true, newEmail, deletedCount)
         } catch (e: Exception) {
             val errMsg = e.message ?: "Parse error"
@@ -174,6 +214,7 @@ class QuettaApiClient {
                 error = errMsg
                 status = "Error"
             }
+            notifyStateChanged()
             Triple(false, errMsg, deletedCount)
         }
     }
@@ -187,6 +228,26 @@ class QuettaApiClient {
             accountId = null
         }
         deleteMailboxById(aid)
+    }
+
+    fun deleteSingleMessage(emailId: String): Boolean {
+        val aid: String?
+        synchronized(lock) {
+            aid = accountId
+            messages.removeAll { it.id == emailId }
+        }
+        notifyStateChanged()
+        if (!aid.isNullOrBlank() && emailId.isNotBlank()) {
+            try {
+                val args = JSONObject().apply {
+                    put("accountId", aid)
+                    put("destroy", JSONArray().put(emailId))
+                }
+                val calls = JSONArray().put(JSONArray().put("Email/set").put(args).put("del"))
+                jmap(calls)
+            } catch (_: Exception) {}
+        }
+        return true
     }
 
     private fun jwtExp(jwt: String?): Long {
@@ -294,11 +355,33 @@ class QuettaApiClient {
         return result
     }
 
+    private fun extractOtpAndLink(subject: String, textBody: String): Pair<String?, String?> {
+        val combined = "$subject\n$textBody"
+        var otp: String? = null
+        if (OTP_KEYWORDS.matcher(combined).find()) {
+            val m = OTP_CANDIDATE.matcher(combined)
+            while (m.find()) {
+                val candidate = m.group(1) ?: continue
+                if (candidate.length == 4 && candidate in listOf("2023", "2024", "2025", "2026", "2027", "1970")) {
+                    continue
+                }
+                otp = candidate
+                break
+            }
+        }
+        var link: String? = null
+        val ml = VERIFY_LINK_RE.matcher(combined)
+        if (ml.find()) {
+            link = ml.group(0)?.trimEnd('.', ',', ';', ')', ']', '>', '"', '\'')
+        }
+        return Pair(otp, link)
+    }
+
     private fun fetchEmailsById(ids: List<String>): List<EmailMessage> {
         val props = JSONArray().apply {
             listOf(
                 "id", "from", "to", "subject", "preview", "receivedAt",
-                "sentAt", "hasAttachment", "textBody", "htmlBody", "bodyValues"
+                "sentAt", "hasAttachment", "attachments", "textBody", "htmlBody", "bodyValues"
             ).forEach { put(it) }
         }
         val idsJson = JSONArray()
@@ -310,7 +393,7 @@ class QuettaApiClient {
             put("properties", props)
             put("fetchTextBodyValues", true)
             put("fetchHTMLBodyValues", true)
-            put("maxBodyValueBytes", 262144)
+            put("maxBodyValueBytes", 524288)
         }
         val calls = JSONArray().put(JSONArray().put("Email/get").put(args).put("g"))
         val resp = jmap(calls)
@@ -320,15 +403,40 @@ class QuettaApiClient {
         for (i in 0 until list.length()) {
             val em = list.optJSONObject(i) ?: continue
             val (textBody, htmlBody) = extractBodies(em)
+            val subj = em.optString("subject").ifBlank { "(no subject)" }
+            val (otp, verifyLink) = extractOtpAndLink(subj, textBody)
+
+            val atts = mutableListOf<AttachmentItem>()
+            val attArr = em.optJSONArray("attachments")
+            if (attArr != null) {
+                for (j in 0 until attArr.length()) {
+                    val a = attArr.optJSONObject(j) ?: continue
+                    val bid = a.optString("blobId", "")
+                    if (bid.isNotEmpty()) {
+                        atts.add(
+                            AttachmentItem(
+                                blobId = bid,
+                                name = a.optString("name", "attachment"),
+                                type = a.optString("type", "application/octet-stream"),
+                                size = a.optLong("size", 0L)
+                            )
+                        )
+                    }
+                }
+            }
+
             out.add(
                 EmailMessage(
                     id = em.optString("id"),
                     from = formatAddr(em.optJSONArray("from")),
                     to = formatAddr(em.optJSONArray("to")),
-                    subject = em.optString("subject").ifBlank { "(no subject)" },
+                    subject = subj,
                     preview = em.optString("preview").ifBlank { textBody.take(120) },
                     date = em.optString("receivedAt").ifBlank { em.optString("sentAt", "-") },
-                    hasAttachment = em.optBoolean("hasAttachment", false),
+                    hasAttachment = em.optBoolean("hasAttachment", false) || atts.isNotEmpty(),
+                    attachments = atts,
+                    otp = otp,
+                    verifyLink = verifyLink,
                     textBody = textBody,
                     htmlBody = htmlBody
                 )
@@ -392,36 +500,47 @@ class QuettaApiClient {
         return Pair(textVal, htmlVal)
     }
 
-    /**
-     * Polls JMAP inbox once and returns newly arrived EmailMessages.
-     */
     fun pollOnce(): List<EmailMessage> {
         synchronized(pollLock) {
             if (accountId.isNullOrBlank() || deleted) return emptyList()
-            val ids = queryInboxIds()
-            val newIds = synchronized(lock) {
-                ids.filter { it !in seenIds }
-            }
-            if (newIds.isEmpty()) {
+            return try {
+                val ids = queryInboxIds()
+                val checkedTime = nowTimeStr()
+                val newIds = synchronized(lock) {
+                    lastChecked = checkedTime
+                    consecutiveFailures = 0
+                    ids.filter { it !in seenIds }
+                }
+                if (newIds.isEmpty()) {
+                    synchronized(lock) {
+                        status = "Watching inbox live"
+                        error = null
+                    }
+                    notifyStateChanged()
+                    return emptyList()
+                }
+                val fetched = fetchEmailsById(newIds)
+                val newlyAdded = mutableListOf<EmailMessage>()
                 synchronized(lock) {
+                    for (item in fetched.reversed()) {
+                        if (seenIds.add(item.id)) {
+                            messages.add(0, item)
+                            newlyAdded.add(item)
+                        }
+                    }
                     status = "Watching inbox live"
                     error = null
                 }
-                return emptyList()
-            }
-            val fetched = fetchEmailsById(newIds)
-            val newlyAdded = mutableListOf<EmailMessage>()
-            synchronized(lock) {
-                for (item in fetched.reversed()) {
-                    if (seenIds.add(item.id)) {
-                        messages.add(0, item)
-                        newlyAdded.add(item)
-                    }
+                notifyStateChanged()
+                newlyAdded
+            } catch (e: Exception) {
+                synchronized(lock) {
+                    consecutiveFailures++
+                    error = "Reconnecting... (${e.message ?: "error"})"
                 }
-                status = "Watching inbox live"
-                error = null
+                notifyStateChanged()
+                throw e
             }
-            return newlyAdded
         }
     }
 
@@ -430,9 +549,21 @@ class QuettaApiClient {
             val obj = JSONObject()
             obj.put("email", email)
             obj.put("status", status)
+            obj.put("lastChecked", lastChecked)
             obj.put("error", error ?: JSONObject.NULL)
             val arr = JSONArray()
             for (m in messages) {
+                val attArr = JSONArray()
+                for (a in m.attachments) {
+                    attArr.put(
+                        JSONObject().apply {
+                            put("blobId", a.blobId)
+                            put("name", a.name)
+                            put("type", a.type)
+                            put("size", a.size)
+                        }
+                    )
+                }
                 arr.put(
                     JSONObject().apply {
                         put("id", m.id)
@@ -442,6 +573,9 @@ class QuettaApiClient {
                         put("preview", m.preview)
                         put("date", m.date)
                         put("hasAttachment", m.hasAttachment)
+                        put("attachments", attArr)
+                        put("otp", m.otp ?: JSONObject.NULL)
+                        put("verifyLink", m.verifyLink ?: JSONObject.NULL)
                         put("textBody", m.textBody)
                         put("htmlBody", m.htmlBody)
                     }

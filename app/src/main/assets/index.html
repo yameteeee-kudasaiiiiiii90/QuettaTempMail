@@ -6,14 +6,17 @@
 <title>Quetta Temp Mail</title>
 <style>
   :root {
-    --bg: #0b1120;
-    --card: #151f32;
-    --card-hover: #1e293b;
-    --border: #26334d;
+    --bg: #070b14;
+    --card: #111827;
+    --card-hover: #1f2937;
+    --border: #263248;
     --text: #f8fafc;
     --muted: #94a3b8;
     --accent: #38bdf8;
     --accent-hover: #0284c7;
+    --otp-bg: rgba(34, 197, 94, 0.16);
+    --otp-border: #22c55e;
+    --otp-text: #4ade80;
     --danger: #ef4444;
     --success: #22c55e;
   }
@@ -27,9 +30,9 @@
     flex-direction: column;
   }
   header {
-    background: #151f32;
+    background: #111827;
     border-bottom: 1px solid var(--border);
-    padding: 14px 14px;
+    padding: 13px 14px;
     position: sticky;
     top: 0;
     z-index: 20;
@@ -39,21 +42,23 @@
     align-items: center;
     justify-content: space-between;
     margin-bottom: 10px;
+    gap: 6px;
   }
   .brand {
-    font-weight: 700;
-    font-size: 1.05rem;
+    font-weight: 800;
+    font-size: 1.04rem;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
   }
   .status-pill {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-size: 0.75rem;
+    font-size: 0.73rem;
     color: var(--muted);
     background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
     padding: 4px 10px;
     border-radius: 999px;
   }
@@ -65,17 +70,18 @@
   }
   .dot.err { background: var(--danger); }
   @keyframes spin { 100% { transform: rotate(360deg); } }
-  .spinning { display: inline-block; animation: spin 0.7s linear infinite; }
+  .spinning { display: inline-block; animation: spin 0.65s linear infinite; }
+
   .email-box {
     width: 100%;
-    background: #090e1a;
+    background: #050811;
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 11px 12px;
     font-family: monospace;
-    font-size: 0.95rem;
+    font-size: 0.94rem;
     color: var(--accent);
-    margin-bottom: 10px;
+    margin-bottom: 9px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -89,9 +95,9 @@
     border: 1px solid var(--border);
     background: var(--card-hover);
     color: var(--text);
-    padding: 10px 8px;
+    padding: 10px 6px;
     border-radius: 10px;
-    font-size: 0.8rem;
+    font-size: 0.79rem;
     font-weight: 600;
     cursor: pointer;
     display: inline-flex;
@@ -103,8 +109,16 @@
   button:disabled { opacity: 0.55; }
   button.primary {
     background: var(--accent);
-    color: #090e1a;
+    color: #050811;
     border-color: var(--accent);
+  }
+  button.otp-chip {
+    background: var(--otp-bg);
+    border-color: var(--otp-border);
+    color: var(--otp-text);
+    padding: 4px 10px;
+    font-size: 0.76rem;
+    border-radius: 999px;
   }
   button.danger {
     color: #fca5a5;
@@ -130,29 +144,45 @@
   .pane-header {
     padding: 10px 14px;
     border-bottom: 1px solid var(--border);
-    font-size: 0.82rem;
-    font-weight: 600;
+    font-size: 0.8rem;
+    font-weight: 700;
     color: var(--muted);
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
+  .search-bar {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(0,0,0,0.2);
+  }
+  .search-bar input {
+    width: 100%;
+    background: #070b14;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 11px;
+    border-radius: 8px;
+    font-size: 0.83rem;
+    outline: none;
+  }
   .msg-list { list-style: none; overflow-y: auto; flex: 1; }
   .msg-item {
-    padding: 14px;
+    padding: 13px 14px;
     border-bottom: 1px solid var(--border);
   }
   .msg-from {
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.89rem;
     margin-bottom: 4px;
     display: flex;
     justify-content: space-between;
     gap: 8px;
   }
-  .msg-time { font-size: 0.74rem; color: var(--muted); font-weight: 400; }
-  .msg-subj { font-size: 0.88rem; margin-bottom: 4px; }
+  .msg-time { font-size: 0.73rem; color: var(--muted); font-weight: 400; }
+  .msg-subj { font-size: 0.86rem; margin-bottom: 4px; }
   .msg-prev { font-size: 0.78rem; color: var(--muted); }
+  .otp-row { margin-top: 7px; display: flex; gap: 6px; }
   .empty-state {
     flex: 1;
     display: flex;
@@ -167,16 +197,34 @@
   .reader-meta {
     padding: 14px;
     border-bottom: 1px solid var(--border);
-    background: rgba(0,0,0,0.15);
+    background: rgba(0,0,0,0.18);
   }
-  .reader-subj { font-size: 1.08rem; font-weight: 700; margin: 8px 0; }
-  .meta-line { font-size: 0.8rem; color: var(--muted); margin-bottom: 4px; }
+  .reader-top-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .reader-subj { font-size: 1.06rem; font-weight: 700; margin: 6px 0; }
+  .meta-line { font-size: 0.79rem; color: var(--muted); margin-bottom: 4px; }
   .meta-line strong { color: var(--text); }
+  .otp-banner {
+    margin-top: 10px;
+    padding: 9px 11px;
+    border-radius: 10px;
+    background: var(--otp-bg);
+    border: 1px solid var(--otp-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
   .view-tabs { display: flex; gap: 6px; margin-top: 10px; }
-  .view-tabs button { padding: 6px 12px; font-size: 0.78rem; }
+  .view-tabs button { padding: 6px 12px; font-size: 0.76rem; }
   .view-tabs button.active {
     background: var(--accent);
-    color: #090e1a;
+    color: #050811;
     border-color: var(--accent);
   }
   .reader-body {
@@ -185,7 +233,7 @@
     overflow-y: auto;
     white-space: pre-wrap;
     word-break: break-word;
-    font-size: 0.92rem;
+    font-size: 0.91rem;
     line-height: 1.55;
   }
   iframe.html-viewer {
@@ -205,7 +253,7 @@
     color: var(--text);
     padding: 9px 16px;
     border-radius: 999px;
-    font-size: 0.82rem;
+    font-size: 0.81rem;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s;
@@ -222,13 +270,14 @@
     <div class="status-pill">
       <span id="dot" class="dot"></span>
       <span id="statusText">Starting...</span>
+      <span id="lastChecked" style="opacity:0.7;"></span>
     </div>
   </div>
-  <div id="emailBox" class="email-box">Initializing...</div>
+  <div id="emailBox" class="email-box" onclick="copyEmail()">Initializing...</div>
   <div class="btn-group">
     <button class="primary" onclick="copyEmail()">📋 Copy</button>
     <button onclick="manualRefresh()" id="refreshBtn"><span id="refIcon">🔄</span> Refresh</button>
-    <button onclick="rotateEmail()" id="rotateBtn">✨ New Mail</button>
+    <button onclick="rotateEmail()" id="rotateBtn">🗑️+✨ New</button>
     <button class="danger" onclick="exitApp()">✖ Exit</button>
   </div>
 </header>
@@ -237,23 +286,38 @@
   <section class="pane inbox-pane">
     <div class="pane-header">
       <span>INBOX (<span id="msgCount">0</span>)</span>
-      <span style="font-size:0.75rem;">Auto-polls every 2s</span>
+      <button style="padding:4px 8px; font-size:0.72rem;" onclick="enableKeepAlive()">🔋 Keep Alive</button>
+    </div>
+    <div class="search-bar">
+      <input type="search" id="searchInput" placeholder="Search sender, subject, or OTP..." oninput="renderList()">
     </div>
     <ul id="msgList" class="msg-list"></ul>
     <div id="inboxEmpty" class="empty-state">
       <div style="font-size: 2rem;">📭</div>
       <div>No messages yet</div>
-      <div style="font-size: 0.76rem;">Tap Refresh or wait for incoming mail</div>
+      <div style="font-size: 0.75rem;">Foreground Service is watching live in the background</div>
     </div>
   </section>
 
   <section class="pane reader-pane">
     <div class="reader-meta">
-      <button onclick="closeReader()" style="padding:6px 12px;">← Back to Inbox</button>
+      <div class="reader-top-actions">
+        <button onclick="closeReader()" style="padding:6px 12px;">← Back</button>
+        <button class="danger" onclick="deleteCurrentEmail()" style="padding:6px 12px;">🗑️ Delete</button>
+      </div>
       <div id="rSubj" class="reader-subj"></div>
       <div class="meta-line"><strong>From:</strong> <span id="rFrom"></span></div>
       <div class="meta-line"><strong>To:</strong> <span id="rTo"></span></div>
       <div class="meta-line"><strong>Date:</strong> <span id="rDate"></span></div>
+
+      <div id="rOtpBanner" class="otp-banner" style="display:none;">
+        <strong style="color:var(--otp-text);">🔑 Code: <span id="rOtpValue" style="font-family:monospace;"></span></strong>
+        <div style="display:flex; gap:6px;">
+          <button class="otp-chip" onclick="copyDetectedOtp()">Copy Code</button>
+          <a id="rVerifyLink" href="#" style="color:var(--accent); font-size:0.78rem; align-self:center; display:none;">🔗 Verify Link</a>
+        </div>
+      </div>
+
       <div class="view-tabs">
         <button id="tabText" class="active" onclick="setMode('text')">Clean Text</button>
         <button id="tabHtml" onclick="setMode('html')">Original HTML</button>
@@ -282,7 +346,20 @@ function showToast(msg) {
 function copyEmail() {
   if (!currentEmail || currentEmail.includes("...")) return;
   if (window.AndroidBridge) {
-    window.AndroidBridge.copyEmail(currentEmail);
+    window.AndroidBridge.copyText(currentEmail, "address");
+  }
+}
+
+function copyDetectedOtp() {
+  const msg = messages.find(x => x.id === selectedId);
+  if (msg && msg.otp && window.AndroidBridge) {
+    window.AndroidBridge.copyText(msg.otp, "OTP");
+  }
+}
+
+function enableKeepAlive() {
+  if (window.AndroidBridge) {
+    window.AndroidBridge.requestUnrestrictedBattery();
   }
 }
 
@@ -291,23 +368,21 @@ function manualRefresh() {
   const icon = document.getElementById("refIcon");
   btn.disabled = true;
   icon.classList.add("spinning");
-  setTimeout(() => {
-    try {
-      const res = JSON.parse(window.AndroidBridge.refreshNow());
-      syncState(true);
-      if (res.ok) {
-        showToast(res.added > 0 ? `Received ${res.added} new email(s)!` : "Inbox is up to date");
-      } else {
-        showToast("Error: " + res.error);
-      }
-    } catch (e) {
-      showToast("Refresh failed");
-    } finally {
-      btn.disabled = false;
-      icon.classList.remove("spinning");
-    }
-  }, 50);
+  if (window.AndroidBridge) {
+    window.AndroidBridge.refreshNow();
+  }
 }
+
+window.onRefreshComplete = function(ok, added, err) {
+  document.getElementById("refreshBtn").disabled = false;
+  document.getElementById("refIcon").classList.remove("spinning");
+  syncState(true);
+  if (ok) {
+    showToast(added > 0 ? `Received ${added} new email(s)!` : "Inbox is up to date");
+  } else {
+    showToast("Error: " + (err || "Failed"));
+  }
+};
 
 function rotateEmail() {
   const btn = document.getElementById("rotateBtn");
@@ -315,26 +390,36 @@ function rotateEmail() {
   btn.textContent = "Deleting old...";
   selectedId = null;
   closeReader();
-  setTimeout(() => {
-    try {
-      const res = JSON.parse(window.AndroidBridge.rotateNewMail());
-      syncState(true);
-      if (res.ok) {
-        showToast(`Old deleted! Copied: ${res.email}`);
-      } else {
-        showToast("Error: " + res.error);
-      }
-    } catch (e) {
-      showToast("Rotation failed");
-    } finally {
-      btn.disabled = false;
-      btn.textContent = "✨ New Mail";
-    }
-  }, 50);
+  if (window.AndroidBridge) {
+    window.AndroidBridge.rotateNewMail();
+  }
+}
+
+window.onRotateComplete = function(ok, emailOrErr, delCount) {
+  const btn = document.getElementById("rotateBtn");
+  btn.disabled = false;
+  btn.textContent = "🗑️+✨ New";
+  syncState(true);
+  if (ok) {
+    showToast(`Old deleted! Copied: ${emailOrErr}`);
+  } else {
+    showToast("Error: " + emailOrErr);
+  }
+};
+
+function deleteCurrentEmail() {
+  if (!selectedId) return;
+  const id = selectedId;
+  selectedId = null;
+  closeReader();
+  if (window.AndroidBridge) {
+    window.AndroidBridge.deleteEmail(id);
+  }
+  showToast("Email deleted");
 }
 
 function exitApp() {
-  if (confirm("Delete current temp email address and exit app?")) {
+  if (confirm("Delete current temp email address and stop background service?")) {
     window.AndroidBridge.exitAndCleanup();
   }
 }
@@ -342,8 +427,17 @@ function exitApp() {
 function renderList() {
   const listEl = document.getElementById("msgList");
   const emptyEl = document.getElementById("inboxEmpty");
+  const q = (document.getElementById("searchInput").value || "").toLowerCase().trim();
+  const filtered = messages.filter(m =>
+    !q ||
+    m.from.toLowerCase().includes(q) ||
+    m.subject.toLowerCase().includes(q) ||
+    m.textBody.toLowerCase().includes(q) ||
+    (m.otp && m.otp.includes(q))
+  );
+
   document.getElementById("msgCount").textContent = messages.length;
-  if (messages.length === 0) {
+  if (filtered.length === 0) {
     listEl.style.display = "none";
     emptyEl.style.display = "flex";
     return;
@@ -351,7 +445,7 @@ function renderList() {
   listEl.style.display = "block";
   emptyEl.style.display = "none";
   listEl.innerHTML = "";
-  for (const m of messages) {
+  for (const m of filtered) {
     const li = document.createElement("li");
     li.className = "msg-item";
     li.onclick = () => selectMessage(m.id);
@@ -364,6 +458,20 @@ function renderList() {
     li.querySelector(".msg-time").textContent = m.date.slice(11, 19) || m.date;
     li.querySelector(".msg-subj").textContent = (m.hasAttachment ? "📎 " : "") + m.subject;
     li.querySelector(".msg-prev").textContent = m.preview;
+
+    if (m.otp) {
+      const otpRow = document.createElement("div");
+      otpRow.className = "otp-row";
+      const chip = document.createElement("button");
+      chip.className = "otp-chip";
+      chip.textContent = "🔑 Copy OTP: " + m.otp;
+      chip.onclick = (ev) => {
+        ev.stopPropagation();
+        window.AndroidBridge.copyText(m.otp, "OTP");
+      };
+      otpRow.appendChild(chip);
+      li.appendChild(otpRow);
+    }
     listEl.appendChild(li);
   }
 }
@@ -378,6 +486,21 @@ function selectMessage(id) {
   document.getElementById("rTo").textContent = msg.to;
   document.getElementById("rDate").textContent = msg.date;
   document.getElementById("rTextBody").textContent = msg.textBody;
+
+  const otpBanner = document.getElementById("rOtpBanner");
+  const verifyLink = document.getElementById("rVerifyLink");
+  if (msg.otp || msg.verifyLink) {
+    otpBanner.style.display = "flex";
+    document.getElementById("rOtpValue").textContent = msg.otp || "Link";
+    if (msg.verifyLink) {
+      verifyLink.style.display = "inline";
+      verifyLink.href = msg.verifyLink;
+    } else {
+      verifyLink.style.display = "none";
+    }
+  } else {
+    otpBanner.style.display = "none";
+  }
 
   const htmlTab = document.getElementById("tabHtml");
   if (msg.htmlBody) {
@@ -407,23 +530,35 @@ function updateBodyVisibility() {
   document.getElementById("rHtmlFrame").style.display = isHtml ? "block" : "none";
 }
 
+function applyStateObj(d, force = false) {
+  currentEmail = d.email;
+  document.getElementById("emailBox").textContent = d.email;
+  document.getElementById("statusText").textContent = d.error ? d.error : d.status;
+  document.getElementById("lastChecked").textContent = d.lastChecked && d.lastChecked !== "-" ? `• ${d.lastChecked}` : "";
+  document.getElementById("dot").className = d.error ? "dot err" : "dot";
+  const prevLen = messages.length;
+  messages = d.messages || [];
+  if (force || messages.length !== prevLen) {
+    renderList();
+  }
+}
+
+window.onNativePush = function(event, rawJson) {
+  try {
+    const d = JSON.parse(rawJson);
+    applyStateObj(d, true);
+  } catch (e) {}
+};
+
 function syncState(force = false) {
   if (!window.AndroidBridge) return;
   try {
     const d = JSON.parse(window.AndroidBridge.getState());
-    currentEmail = d.email;
-    document.getElementById("emailBox").textContent = d.email;
-    document.getElementById("statusText").textContent = d.error ? d.error : d.status;
-    document.getElementById("dot").className = d.error ? "dot err" : "dot";
-    const prevLen = messages.length;
-    messages = d.messages || [];
-    if (force || messages.length !== prevLen) {
-      renderList();
-    }
+    applyStateObj(d, force);
   } catch (e) {}
 }
 
-setInterval(() => syncState(false), 1200);
+setInterval(() => syncState(false), 2000);
 syncState(true);
 </script>
 </body>
