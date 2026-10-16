@@ -1,0 +1,7 @@
+<resources>
+    <style name="Theme.QuettaTempMail" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:statusBarColor">#0B1120</item>
+        <item name="android:navigationBarColor">#0B1120</item>
+        <item name="android:windowBackground">#0B1120</item>
+    </style>
+</resources>
