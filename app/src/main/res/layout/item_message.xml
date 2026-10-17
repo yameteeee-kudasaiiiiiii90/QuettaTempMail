@@ -1,113 +1,227 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="10dp"
-    app:cardBackgroundColor="#1C1C1E"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="0dp"
-    app:cardPreventCornerOverlap="false"
-    app:contentPadding="12dp">
+    android:background="@drawable/bg_ios_card"
+    android:orientation="vertical"
+    android:layout_marginTop="8dp"
+    android:padding="14dp">
 
+    <!-- Collapsed row -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
         android:orientation="horizontal">
 
-        <!-- Squircle Avatar -->
         <FrameLayout
             android:id="@+id/avatarFrame"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
-            android:background="@drawable/bg_squircle_blue"
-            android:layout_marginEnd="12dp">
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@drawable/bg_avatar">
+
             <TextView
                 android:id="@+id/tvAvatarText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="A"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="Q"
                 android:textColor="#FFFFFF"
-                android:textSize="16sp"
-                android:textStyle="bold"/>
+                android:textSize="18sp"
+                android:textStyle="bold" />
         </FrameLayout>
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
             android:layout_weight="1"
             android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:layout_marginBottom="2dp">
+                android:orientation="horizontal">
+
                 <TextView
                     android:id="@+id/tvSender"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:maxLines="1"
                     android:text="Sender"
                     android:textColor="#FFFFFF"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:singleLine="true"
-                    android:ellipsize="end"/>
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
                 <TextView
                     android:id="@+id/tvTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="2:30 AM"
+                    android:layout_marginStart="8dp"
+                    android:text="--:--"
                     android:textColor="#8E8E93"
-                    android:textSize="11sp"
-                    android:layout_marginStart="8dp"/>
-                <CheckBox
-                    android:id="@+id/cbStar"
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:button="@drawable/selector_star"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:layout_marginStart="4px"/>
+                    android:textSize="12sp" />
             </LinearLayout>
 
             <TextView
                 android:id="@+id/tvSubject"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Subject line here"
-                android:textColor="#E5E5EA"
-                android:textSize="13sp"
-                android:singleLine="true"
+                android:layout_marginTop="2dp"
                 android:ellipsize="end"
-                android:layout_marginBottom="2dp"/>
+                android:maxLines="1"
+                android:text="Subject"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/tvPreview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Preview body snippet..."
+                android:layout_marginTop="2dp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:text="Preview"
                 android:textColor="#8E8E93"
-                android:textSize="12sp"
-                android:singleLine="true"
-                android:ellipsize="end"/>
-
-            <Button
-                android:id="@+id/btnCopyOtpChip"
-                android:layout_width="wrap_content"
-                android:layout_height="28dp"
-                android:background="@drawable/bg_otp_chip"
-                android:text="📋 Copy OTP: 8432"
-                android:textColor="#4ADE80"
-                android:textSize="11sp"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:layout_marginTop="6dp"
-                android:visibility="gone"
-                android:stateListAnimator="@null"/>
+                android:textSize="13sp" />
         </LinearLayout>
 
+        <CheckBox
+            android:id="@+id/cbStar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:button="@drawable/selector_star" />
     </LinearLayout>
-</androidx.cardview.widget.CardView>
+
+    <Button
+        android:id="@+id/btnCopyOtpChip"
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_otp_chip"
+        android:minHeight="0dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:text="📋 Copy OTP"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
+    <!-- Expanded reader (inline, replaces ReaderActivity) -->
+    <LinearLayout
+        android:id="@+id/layoutExpanded"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:background="#3A3A3C" />
+
+        <TextView
+            android:id="@+id/tvFullBody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Full message body"
+            android:textColor="#E5E5EA"
+            android:textIsSelectable="true"
+            android:textSize="14sp"
+            android:lineSpacingExtra="3dp" />
+
+        <LinearLayout
+            android:id="@+id/layoutExpandedOtp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_otp_banner"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="12dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="VERIFICATION CODE"
+                    android:textColor="#C4B5FD"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvExpandedOtpValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="123456"
+                    android:textColor="#FFFFFF"
+                    android:textIsSelectable="true"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnExpandedCopyOtp"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_ios_blue_btn"
+                android:minHeight="0dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:text="Copy"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnOpenVerifyLink"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_verify_btn"
+            android:text="🔗 Open Verification Link"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tvAttachmentInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="📎 1 attachment"
+            android:textColor="#8E8E93"
+            android:textSize="13sp"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btnExpandedDelete"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginTop="12dp"
+            android:background="@null"
+            android:text="Delete Email"
+            android:textAllCaps="false"
+            android:textColor="#FF453A"
+            android:textSize="15sp" />
+    </LinearLayout>
+</LinearLayout>

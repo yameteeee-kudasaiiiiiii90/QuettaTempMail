@@ -11,8 +11,8 @@ android {
         applicationId = "com.quetta.tempmail"
         minSdk = 24
         targetSdk = 34
-        versionCode = 6
-        versionName = "5.0-Native"
+        versionCode = 7
+        versionName = "6.0"
     }
 
     buildTypes {

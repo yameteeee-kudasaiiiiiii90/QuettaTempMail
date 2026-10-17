@@ -1,4 +1,4 @@
-name: Build Quetta Temp Mail APK (Native v5)
+name: Build Quetta Temp Mail APK (v6)
 
 on:
   push:
@@ -29,5 +29,5 @@ jobs:
       - name: Upload Compiled APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: QuettaTempMail-native-debug-apk
+          name: QuettaTempMail-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk

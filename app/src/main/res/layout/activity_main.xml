@@ -4,608 +4,546 @@
     android:layout_height="match_parent"
     android:background="#000000">
 
-    <!-- iOS Frosted Header -->
-    <LinearLayout
-        android:id="@+id/headerLayout"
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:background="#120E16"
-        android:elevation="4dp">
+        android:layout_height="match_parent"
+        android:layout_above="@+id/tabBar"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="6dp">
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- iOS large title header -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Quetta Mail"
+                android:textColor="#FFFFFF"
+                android:textSize="34sp"
+                android:textStyle="bold" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_pill"
                 android:gravity="center_vertical"
-                android:background="@drawable/bg_status_pill"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp">
+                android:orientation="horizontal"
+                android:paddingStart="12dp"
+                android:paddingTop="6dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="6dp">
+
                 <View
                     android:id="@+id/statusDot"
-                    android:layout_width="7dp"
-                    android:layout_height="7dp"
-                    android:background="@drawable/bg_green_dot"
-                    android:layout_marginEnd="6dp"/>
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:background="@drawable/bg_green_dot" />
+
                 <TextView
                     android:id="@+id/statusText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Watching Live"
+                    android:layout_marginStart="6dp"
+                    android:text="Starting…"
                     android:textColor="#30D158"
-                    android:textSize="12sp"
-                    android:textStyle="bold"/>
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
             </LinearLayout>
 
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1"/>
-
-            <ImageButton
-                android:id="@+id/btnRefresh"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:background="@drawable/bg_icon_btn"
-                android:src="@drawable/ic_refresh"
-                android:tint="#0A84FF"
-                android:scaleType="centerInside"
-                android:layout_marginEnd="8dp"
-                android:contentDescription="Refresh"/>
-
-            <ImageButton
-                android:id="@+id/btnRotate"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:background="@drawable/bg_icon_btn"
-                android:src="@drawable/ic_compose"
-                android:tint="#0A84FF"
-                android:scaleType="centerInside"
-                android:contentDescription="New Address"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="10dp">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Quetta Temp Mail"
-                android:textColor="#FFFFFF"
-                android:textSize="26sp"
-                android:textStyle="bold"
-                android:letterSpacing="-0.03"/>
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1"/>
             <TextView
                 android:id="@+id/lastSyncedText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text=""
                 android:textColor="#8E8E93"
-                android:textSize="11sp"/>
-        </LinearLayout>
+                android:textSize="12sp" />
 
-        <!-- Address Capsule -->
+            <!-- Address card -->
+            <LinearLayout
+                android:id="@+id/sectionGenerate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_ios_card"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TEMPORARY ADDRESS"
+                    android:textColor="#8E8E93"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvEmailAddress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="Initializing…"
+                    android:textColor="#FFFFFF"
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btnCopyAddress"
+                        android:layout_width="0dp"
+                        android:layout_height="44dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_ios_blue_btn"
+                        android:text="Copy"
+                        android:textAllCaps="false"
+                        android:textColor="#FFFFFF"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <ImageButton
+                        android:id="@+id/btnRefresh"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_icon_btn"
+                        android:contentDescription="Refresh"
+                        android:src="@drawable/ic_refresh" />
+
+                    <Button
+                        android:id="@+id/btnNewAddress"
+                        android:layout_width="0dp"
+                        android:layout_height="44dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_ios_blue_btn"
+                        android:text="New"
+                        android:textAllCaps="false"
+                        android:textColor="#FFFFFF"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- iOS search field -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_ios_search"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="12dp"
+                android:paddingTop="10dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🔍"
+                    android:textSize="15sp" />
+
+                <EditText
+                    android:id="@+id/etSearch"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:hint="Search sender, subject, code"
+                    android:imeOptions="actionSearch"
+                    android:inputType="text"
+                    android:singleLine="true"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#8E8E93"
+                    android:textSize="15sp" />
+            </LinearLayout>
+
+            <!-- Inbox section -->
+            <LinearLayout
+                android:id="@+id/sectionInbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tvSectionTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Inbox"
+                        android:textColor="#FFFFFF"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvMsgCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 messages"
+                        android:textColor="#8E8E93"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/bg_segmented_bg"
+                    android:orientation="horizontal"
+                    android:padding="3dp">
+
+                    <TextView
+                        android:id="@+id/segAll"
+                        android:layout_width="0dp"
+                        android:layout_height="34dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_segment_active"
+                        android:gravity="center"
+                        android:text="Inbox"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/segStarred"
+                        android:layout_width="0dp"
+                        android:layout_height="34dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="Starred"
+                        android:textColor="#8E8E93"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/segOtp"
+                        android:layout_width="0dp"
+                        android:layout_height="34dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="OTP Codes"
+                        android:textColor="#8E8E93"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerViewMessages"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:nestedScrollingEnabled="false" />
+
+                <LinearLayout
+                    android:id="@+id/layoutEmptyInbox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/bg_ios_card"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="32dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📭"
+                        android:textSize="36sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="No messages yet"
+                        android:textColor="#8E8E93"
+                        android:textSize="15sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- History section -->
+            <LinearLayout
+                android:id="@+id/sectionHistory"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="History"
+                    android:textColor="#FFFFFF"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerViewHistory"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/bg_ios_card"
+                    android:nestedScrollingEnabled="false"
+                    android:padding="8dp" />
+
+                <TextView
+                    android:id="@+id/layoutEmptyHistory"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/bg_ios_card"
+                    android:gravity="center"
+                    android:padding="24dp"
+                    android:text="No history yet — generated addresses will appear here"
+                    android:textColor="#8E8E93"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <!-- Settings section -->
+            <LinearLayout
+                android:id="@+id/sectionSettings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Settings"
+                    android:textColor="#FFFFFF"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/bg_ios_card"
+                    android:orientation="vertical"
+                    android:paddingStart="16dp"
+                    android:paddingTop="4dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="4dp">
+
+                    <LinearLayout
+                        android:id="@+id/rowKeepAlive"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🔋"
+                            android:textSize="20sp" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Keep Alive"
+                                android:textColor="#FFFFFF"
+                                android:textSize="16sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Exempt app from battery optimizations"
+                                android:textColor="#8E8E93"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="›"
+                            android:textColor="#8E8E93"
+                            android:textSize="22sp" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="0.5dp"
+                        android:background="#3A3A3C" />
+
+                    <LinearLayout
+                        android:id="@+id/rowExit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:paddingTop="14dp"
+                        android:paddingBottom="14dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Exit App"
+                            android:textColor="#FF453A"
+                            android:textSize="16sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvVersion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center"
+                    android:text="Quetta Temp Mail v6.0"
+                    android:textColor="#636366"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="16dp" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- iOS-style bottom tab bar: scrolls to page sections -->
+    <LinearLayout
+        android:id="@+id/tabBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="#1C1C1E"
+        android:orientation="vertical">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="#3A3A3C" />
+
         <LinearLayout
-            android:id="@+id/capsuleLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:background="@drawable/bg_address_capsule"
-            android:paddingStart="14dp"
             android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:paddingEnd="8dp"
-            android:layout_marginBottom="10dp">
-            <TextView
-                android:id="@+id/tvEmailAddress"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Initializing..."
-                android:textColor="#38BDF8"
-                android:textSize="14sp"
-                android:fontFamily="monospace"
-                android:singleLine="true"
-                android:ellipsize="middle"/>
-            <Button
-                android:id="@+id/btnCopyAddress"
-                android:layout_width="wrap_content"
-                android:layout_height="34dp"
-                android:background="@drawable/bg_ios_blue_btn"
-                android:text="Copy"
-                android:textColor="#FFFFFF"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:paddingStart="14dp"
-                android:paddingEnd="14dp"
-                android:stateListAnimator="@null"/>
-        </LinearLayout>
-
-        <!-- Segmented Control -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="34dp"
-            android:orientation="horizontal"
-            android:background="@drawable/bg_segmented_bg"
-            android:padding="2dp">
-            <TextView
-                android:id="@+id/segAll"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:text="Inbox"
-                android:textColor="#FFFFFF"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:background="@drawable/bg_segment_active"/>
-            <TextView
-                android:id="@+id/segStarred"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:text="Starred"
-                android:textColor="#8E8E93"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:background="@android:color/transparent"/>
-            <TextView
-                android:id="@+id/segOtp"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:text="OTP Codes"
-                android:textColor="#8E8E93"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:background="@android:color/transparent"/>
-        </LinearLayout>
-    </LinearLayout>
-
-    <!-- Content Area (Tabs) -->
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/headerLayout"
-        android:layout_above="@id/bottomTabBar">
-
-        <!-- TAB 1: INBOX -->
-        <LinearLayout
-            android:id="@+id/tabInboxContainer"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:paddingBottom="10dp">
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:id="@+id/tabInbox"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="10dp">
+                android:layout_weight="1"
+                android:gravity="center"
+                android:onClick="onTabInboxClick"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/iconTabInbox"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_tab_inbox" />
+
                 <TextView
-                    android:id="@+id/tvSectionTitle"
+                    android:id="@+id/textTabInbox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Inbox"
-                    android:textColor="#FFFFFF"
-                    android:textSize="18sp"
-                    android:textStyle="bold"/>
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"/>
-                <TextView
-                    android:id="@+id/tvMsgCount"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0 messages"
-                    android:textColor="#8E8E93"
-                    android:textSize="13sp"/>
+                    android:textColor="#0A84FF"
+                    android:textSize="11sp" />
             </LinearLayout>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerViewMessages"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clipToPadding="false"
-                android:paddingBottom="20dp"/>
-
             <LinearLayout
-                android:id="@+id/layoutEmptyInbox"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
+                android:id="@+id/tabGenerate"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:gravity="center"
-                android:visibility="gone">
+                android:onClick="onTabGenerateClick"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/iconTabGenerate"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_tab_generate" />
+
                 <TextView
+                    android:id="@+id/textTabGenerate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="📭"
-                    android:textSize="48sp"
-                    android:layout_marginBottom="10dp"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="No Messages Yet"
-                    android:textColor="#FFFFFF"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="4dp"/>
-                <TextView
-                    android:layout_width="240dp"
-                    android:layout_height="wrap_content"
-                    android:text="Incoming emails and verification codes will appear here automatically."
+                    android:text="Generate"
                     android:textColor="#8E8E93"
-                    android:textSize="13sp"
-                    android:gravity="center"/>
+                    android:textSize="11sp" />
             </LinearLayout>
-        </LinearLayout>
 
-        <!-- TAB 2: GENERATE -->
-        <LinearLayout
-            android:id="@+id/tabGenerateContainer"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="16dp"
-            android:visibility="gone">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Disposable Identity"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="12dp"/>
             <LinearLayout
-                android:layout_width="match_parent"
+                android:id="@+id/tabHistory"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/bg_ios_card"
-                android:padding="4dp">
-                <LinearLayout
-                    android:layout_width="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:onClick="onTabHistoryClick"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/iconTabHistory"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_tab_history" />
+
+                <TextView
+                    android:id="@+id/textTabHistory"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:padding="12dp">
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Active Temp Email"
-                            android:textColor="#FFFFFF"
-                            android:textSize="15sp"/>
-                        <TextView
-                            android:id="@+id/tvGenEmail"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textColor="#38BDF8"
-                            android:textSize="13sp"
-                            android:fontFamily="monospace"
-                            android:layout_marginTop="2dp"/>
-                    </LinearLayout>
-                    <Button
-                        android:layout_width="wrap_content"
-                        android:layout_height="32dp"
-                        android:background="@drawable/bg_ios_blue_btn"
-                        android:text="Copy"
-                        android:textColor="#FFFFFF"
-                        android:textSize="12sp"
-                        android:onClick="onGenCopyClick"
-                        android:stateListAnimator="@null"/>
-                </LinearLayout>
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="0.5dp"
-                    android:background="#3A3A3C"
-                    android:layout_marginStart="12dp"
-                    android:layout_marginEnd="12dp"/>
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:padding="12dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:onClick="onGenRotateClick">
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Generate New Address"
-                            android:textColor="#FFFFFF"
-                            android:textSize="15sp"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Deletes current address and creates a fresh inbox"
-                            android:textColor="#8E8E93"
-                            android:textSize="12sp"
-                            android:layout_marginTop="2dp"/>
-                    </LinearLayout>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="✨"
-                        android:textSize="18sp"/>
-                </LinearLayout>
+                    android:text="History"
+                    android:textColor="#8E8E93"
+                    android:textSize="11sp" />
             </LinearLayout>
-        </LinearLayout>
 
-        <!-- TAB 3: HISTORY -->
-        <LinearLayout
-            android:id="@+id/tabHistoryContainer"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="16dp"
-            android:visibility="gone">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Session Activity"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="12dp"/>
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerViewHistory"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/bg_ios_card"
-                android:clipToPadding="false"/>
-        </LinearLayout>
-
-        <!-- TAB 4: SETTINGS -->
-        <LinearLayout
-            android:id="@+id/tabSettingsContainer"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="16dp"
-            android:visibility="gone">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Settings &amp; Background"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="12dp"/>
             <LinearLayout
-                android:layout_width="match_parent"
+                android:id="@+id/tabSettings"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/bg_ios_card"
-                android:padding="4dp">
-                <LinearLayout
-                    android:layout_width="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:onClick="onTabSettingsClick"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/iconTabSettings"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_tab_settings" />
+
+                <TextView
+                    android:id="@+id/textTabSettings"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:padding="12dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:onClick="onKeepAliveClick">
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Unrestricted Background Polling"
-                            android:textColor="#FFFFFF"
-                            android:textSize="15sp"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Exempt app from battery optimizations for instant OTPs"
-                            android:textColor="#8E8E93"
-                            android:textSize="12sp"
-                            android:layout_marginTop="2dp"/>
-                    </LinearLayout>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="🔋"
-                        android:textSize="18sp"/>
-                </LinearLayout>
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="0.5dp"
-                    android:background="#3A3A3C"
-                    android:layout_marginStart="12dp"
-                    android:layout_marginEnd="12dp"/>
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:padding="12dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:onClick="onExitAppClick">
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Destroy Inbox &amp; Exit"
-                            android:textColor="#FF453A"
-                            android:textSize="15sp"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Deletes active address from server and stops service"
-                            android:textColor="#8E8E93"
-                            android:textSize="12sp"
-                            android:layout_marginTop="2dp"/>
-                    </LinearLayout>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="✖"
-                        android:textColor="#FF453A"
-                        android:textSize="16sp"/>
-                </LinearLayout>
+                    android:text="Settings"
+                    android:textColor="#8E8E93"
+                    android:textSize="11sp" />
             </LinearLayout>
         </LinearLayout>
-
-    </FrameLayout>
-
-    <!-- iOS Frosted Bottom Tab Bar -->
-    <LinearLayout
-        android:id="@+id/bottomTabBar"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:layout_alignParentBottom="true"
-        android:orientation="horizontal"
-        android:background="#16161A"
-        android:elevation="8dp">
-
-        <LinearLayout
-            android:id="@+id/tabNavInbox"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true"
-            android:onClick="onTabInboxClick">
-            <ImageView
-                android:id="@+id/iconTabInbox"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_tab_inbox"
-                android:tint="#0A84FF"
-                android:layout_marginBottom="2dp"/>
-            <TextView
-                android:id="@+id/textTabInbox"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Inbox"
-                android:textColor="#0A84FF"
-                android:textSize="11sp"
-                android:textStyle="bold"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/tabNavGenerate"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true"
-            android:onClick="onTabGenerateClick">
-            <ImageView
-                android:id="@+id/iconTabGenerate"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_tab_generate"
-                android:tint="#8E8E93"
-                android:layout_marginBottom="2dp"/>
-            <TextView
-                android:id="@+id/textTabGenerate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Generate"
-                android:textColor="#8E8E93"
-                android:textSize="11sp"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/tabNavHistory"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true"
-            android:onClick="onTabHistoryClick">
-            <ImageView
-                android:id="@+id/iconTabHistory"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_tab_history"
-                android:tint="#8E8E93"
-                android:layout_marginBottom="2dp"/>
-            <TextView
-                android:id="@+id/textTabHistory"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="History"
-                android:textColor="#8E8E93"
-                android:textSize="11sp"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/tabNavSettings"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true"
-            android:onClick="onTabSettingsClick">
-            <ImageView
-                android:id="@+id/iconTabSettings"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_tab_settings"
-                android:tint="#8E8E93"
-                android:layout_marginBottom="2dp"/>
-            <TextView
-                android:id="@+id/textTabSettings"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Settings"
-                android:textColor="#8E8E93"
-                android:textSize="11sp"/>
-        </LinearLayout>
-
     </LinearLayout>
-
 </RelativeLayout>
