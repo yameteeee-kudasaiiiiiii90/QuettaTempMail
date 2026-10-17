@@ -89,7 +89,7 @@ class MainActivity : AppCompatActivity() {
             emptyList(),
             starredIds,
             onStarClick = { id ->
-                if (starredIds.contains(id)) starredIds.remove(id) elseقات starredIds.add(id)
+                if (starredIds.contains(id)) starredIds.remove(id) elsestarredIds.add(id)
                 refreshUiState()
             },
             onItemClick = { msg ->
@@ -204,7 +204,7 @@ class MainActivity : AppCompatActivity() {
     fun onGenRotateClick(view: View) { rotateNewAddress() }
 
     private fun rotateNewAddress() {
-        Toast.initSafe
+        
         Toast.makeText(this, "Deleting old address & creating new...", Toast.LENGTH_SHORT).show()
         mailService?.triggerRotateNewMail { ok, emailOrErr, _ ->
             refreshUiState()
@@ -234,16 +234,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onExitAppClick(view: View) {
-        if (android.app.AlertDialog.Builder(this)
-                .setTitle("Exit App")
-                .setMessage("Delete temporary email address and stop background service?")
-                .setPositiveButton("Exit") { _, _ ->
-                    mailService?.shutdownAndExit {
-                        finishAndRemoveTask()
-                    }
+        android.app.AlertDialog.Builder(this)
+            .setTitle("Exit App")
+            .setMessage("Delete temporary email address and stop background service?")
+            .setPositiveButton("Exit") { _, _ ->
+                mailService?.shutdownAndExit {
+                    finishAndRemoveTask()
                 }
-                .setNegativeButton("Cancel", null)
-                .show() == null) {}
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun addHistory(text: String) {
@@ -281,7 +281,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        findViewById<TextView>(R.id.tvMsgCount).text = "${filtered.length} messages"
+        findViewById<TextView>(R.id.tvMsgCount).text = "${filtered.size} messages"
         messagesAdapter.updateData(filtered)
 
         val emptyLayout = findViewById<LinearLayout>(R.id.layoutEmptyInbox)

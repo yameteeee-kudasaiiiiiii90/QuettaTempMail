@@ -45,31 +45,17 @@ class QuettaApiClient(private val onStateChanged: (() -> Unit)? = null) {
         private const val UA = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Mobile Safari/537.36"
         private const val QUETTA_HDR = "android/Quetta/5877"
 
-        private val OTP_KEYWORDS = Pattern.compile(
+                private val OTP_KEYWORDS = Pattern.compile(
             "\\b(code|otp|verification|verify|pin|passcode|token|security|confirm|login|auth)\\b",
             Pattern.CASE_INSENSITIVE
         )
         private val OTP_CANDIDATE = Pattern.compile("(?<![0-9A-Za-z#])(\\d{4,8})(?![0-9A-Za-z])")
         private val VERIFY_LINK_RE = Pattern.compile(
-            "https?://[^\\s<>"']+(?:verify|confirm|token|auth|activate|magic|login|code=)[^\\s<>"']*",
+            "https?://[^\\s<>\'\"]+(?:verify|confirm|token|auth|activate|magic|login|code=)[^\\s<>\'\"]*",
             Pattern.CASE_INSENSITIVE
         )
-    }
 
-    private val lock = Any()
-    private val pollLock = Any()
-
-    @Volatile var accountId: String? = null
-    @Volatile var email: String = "Initializing..."
-    @Volatile var token: String? = null
-    @Volatile var mboxId: String = "c"
-    @Volatile var status: String = "Starting up..."
-    @Volatile var error: String? = null
-    @Volatile var lastChecked: String = "-"
-    @Volatile var consecutiveFailures: Int = 0
-    @Volatile var deleted: Boolean = false
-
-    private val seenIds = mutableSetOf<String>()
+private val seenIds = mutableSetOf<String>()
     private val messages = mutableListOf<EmailMessage>()
 
     private fun nowTimeStr(): String =
