@@ -15,9 +15,8 @@ import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.view.animation.AnimationUtils
+import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -25,33 +24,24 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.widget.NestedScrollView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 
 /**
- * Quetta Temp Mail v6.0 — single-page iOS 18 dark-mode edition.
- * Everything lives on one scrollable page: address card, search,
- * segmented inbox, inline-expanding reader, history and settings.
+ * Quetta Temp Mail v6.1 — the classic interface (title + status pill,
+ * address box, Copy/Refresh/New/Exit row, inbox card with search),
+ * restyled in iOS 18 dark mode. Tap a message to expand it inline.
  */
 class MainActivity : AppCompatActivity() {
 
     private var mailService: QuettaMailService? = null
     private var isBound = false
 
-    private val starredIds = mutableSetOf<String>()
     private val expandedIds = mutableSetOf<String>()
-    private val historyItems = mutableListOf<HistoryItem>()
-    private var currentSegment = "all"
     private var searchQuery = ""
-    private var currentTab = "inbox"
 
     private lateinit var messagesAdapter: MessagesAdapter
-    private lateinit var historyAdapter: HistoryAdapter
-    private lateinit var scrollView: NestedScrollView
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -85,20 +75,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupViews() {
-        scrollView = findViewById(R.id.scrollView)
-
-        // ---- inbox list ----
         val rv = findViewById<RecyclerView>(R.id.recyclerViewMessages)
         rv.layoutManager = LinearLayoutManager(this)
-        rv.isNestedScrollingEnabled = false
         messagesAdapter = MessagesAdapter(
             emptyList(),
-            starredIds,
             expandedIds,
-            onStarClick = { id ->
-                if (starredIds.contains(id)) starredIds.remove(id) else starredIds.add(id)
-                refreshUiState()
-            },
             onToggleExpand = { id ->
                 if (expandedIds.contains(id)) expandedIds.remove(id) else expandedIds.add(id)
                 val pos = messagesAdapter.currentPositionOf(id)
@@ -116,19 +97,10 @@ class MainActivity : AppCompatActivity() {
         )
         rv.adapter = messagesAdapter
 
-        // ---- history list ----
-        val rvHist = findViewById<RecyclerView>(R.id.recyclerViewHistory)
-        rvHist.layoutManager = LinearLayoutManager(this)
-        rvHist.isNestedScrollingEnabled = false
-        historyAdapter = HistoryAdapter(historyItems)
-        rvHist.adapter = historyAdapter
-
-        // ---- address card ----
-        findViewById<View>(R.id.btnCopyAddress).setOnClickListener { copyActiveEmail() }
+        findViewById<Button>(R.id.btnCopyAddress).setOnClickListener { copyActiveEmail() }
         findViewById<TextView>(R.id.tvEmailAddress).setOnClickListener { copyActiveEmail() }
-        findViewById<View>(R.id.btnNewAddress).setOnClickListener { rotateNewAddress() }
-        findViewById<View>(R.id.btnRefresh).setOnClickListener {
-            it.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_in))
+
+        findViewById<Button>(R.id.btnRefresh).setOnClickListener {
             mailService?.triggerImmediateRefresh { added, err ->
                 refreshUiState()
                 if (err != null) {
@@ -143,7 +115,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // ---- search ----
+        findViewById<Button>(R.id.btnNewAddress).setOnClickListener { rotateNewAddress() }
+        findViewById<Button>(R.id.btnExit).setOnClickListener { onExitAppClick() }
+        findViewById<Button>(R.id.btnKeepAlive).setOnClickListener { onKeepAliveClick() }
+
         findViewById<EditText>(R.id.etSearch).addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -152,73 +127,6 @@ class MainActivity : AppCompatActivity() {
                 refreshUiState()
             }
         })
-
-        // ---- segments ----
-        findViewById<TextView>(R.id.segAll).setOnClickListener { setSegment("all") }
-        findViewById<TextView>(R.id.segStarred).setOnClickListener { setSegment("starred") }
-        findViewById<TextView>(R.id.segOtp).setOnClickListener { setSegment("otp") }
-
-        // ---- settings rows ----
-        findViewById<LinearLayout>(R.id.rowKeepAlive).setOnClickListener { onKeepAliveClick() }
-        findViewById<LinearLayout>(R.id.rowExit).setOnClickListener { onExitAppClick() }
-
-        updateTabSelection("inbox")
-    }
-
-    // ---------- bottom tabs: scroll to page sections ----------
-
-    fun onTabInboxClick(view: View) = goToTab("inbox", R.id.sectionInbox)
-    fun onTabGenerateClick(view: View) = goToTab("generate", R.id.sectionGenerate)
-    fun onTabHistoryClick(view: View) = goToTab("history", R.id.sectionHistory)
-    fun onTabSettingsClick(view: View) = goToTab("settings", R.id.sectionSettings)
-
-    private fun goToTab(tab: String, sectionId: Int) {
-        currentTab = tab
-        updateTabSelection(tab)
-        val section = findViewById<View>(sectionId)
-        scrollView.post { scrollView.smoothScrollTo(0, section.top) }
-    }
-
-    private fun updateTabSelection(tab: String) {
-        val blue = 0xFF0A84FF.toInt()
-        val gray = 0xFF8E8E93.toInt()
-        setTabTint(R.id.iconTabInbox, R.id.textTabInbox, tab == "inbox", blue, gray)
-        setTabTint(R.id.iconTabGenerate, R.id.textTabGenerate, tab == "generate", blue, gray)
-        setTabTint(R.id.iconTabHistory, R.id.textTabHistory, tab == "history", blue, gray)
-        setTabTint(R.id.iconTabSettings, R.id.textTabSettings, tab == "settings", blue, gray)
-    }
-
-    private fun setTabTint(iconId: Int, textId: Int, active: Boolean, blue: Int, gray: Int) {
-        findViewById<ImageView>(iconId).setColorFilter(if (active) blue else gray)
-        findViewById<TextView>(textId).setTextColor(if (active) blue else gray)
-    }
-
-    // ---------- segments ----------
-
-    private fun setSegment(seg: String) {
-        currentSegment = seg
-        val colActive = 0xFFFFFFFF.toInt()
-        val colMuted = 0xFF8E8E93.toInt()
-
-        val tvAll = findViewById<TextView>(R.id.segAll)
-        val tvStarred = findViewById<TextView>(R.id.segStarred)
-        val tvOtp = findViewById<TextView>(R.id.segOtp)
-
-        tvAll.setBackgroundResource(if (seg == "all") R.drawable.bg_segment_active else android.R.color.transparent)
-        tvAll.setTextColor(if (seg == "all") colActive else colMuted)
-
-        tvStarred.setBackgroundResource(if (seg == "starred") R.drawable.bg_segment_active else android.R.color.transparent)
-        tvStarred.setTextColor(if (seg == "starred") colActive else colMuted)
-
-        tvOtp.setBackgroundResource(if (seg == "otp") R.drawable.bg_segment_active else android.R.color.transparent)
-        tvOtp.setTextColor(if (seg == "otp") colActive else colMuted)
-
-        findViewById<TextView>(R.id.tvSectionTitle).text = when (seg) {
-            "starred" -> "Starred"
-            "otp" -> "Verification Codes"
-            else -> "Inbox"
-        }
-        refreshUiState()
     }
 
     // ---------- actions ----------
@@ -235,7 +143,6 @@ class MainActivity : AppCompatActivity() {
         mailService?.triggerRotateNewMail { ok, emailOrErr, _ ->
             refreshUiState()
             if (ok) {
-                addHistory("Generated new address: $emailOrErr")
                 mailService?.copyToClipboard(emailOrErr, "Old deleted! Copied: $emailOrErr")
             } else {
                 Toast.makeText(this, "Error: $emailOrErr", Toast.LENGTH_SHORT).show()
@@ -300,19 +207,11 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun addHistory(text: String) {
-        val timeStr = SimpleDateFormat("HH:mm:ss", Locale.US).format(Date())
-        historyItems.add(0, HistoryItem(timeStr, text))
-        historyAdapter.notifyDataSetChanged()
-        refreshHistoryVisibility()
-    }
-
     // ---------- UI refresh ----------
 
     private fun refreshUiState() {
         val client = mailService?.apiClient ?: return
-        val em = client.email
-        findViewById<TextView>(R.id.tvEmailAddress).text = em
+        findViewById<TextView>(R.id.tvEmailAddress).text = client.email
 
         val statusText = findViewById<TextView>(R.id.statusText)
         val statusDot = findViewById<View>(R.id.statusDot)
@@ -321,30 +220,25 @@ class MainActivity : AppCompatActivity() {
             statusText.setTextColor(0xFFFF453A.toInt())
             statusDot.setBackgroundResource(R.drawable.bg_red_dot)
         } else {
-            statusText.text = if (client.status == "Watching inbox live") "Watching Live" else client.status
-            statusText.setTextColor(0xFF30D158.toInt())
+            statusText.text = if (client.status == "Watching inbox live") "Watching live in the background"
+                else client.status
+            statusText.setTextColor(0xFF8E8E93.toInt())
             statusDot.setBackgroundResource(R.drawable.bg_green_dot)
         }
 
-        findViewById<TextView>(R.id.lastSyncedText).text =
-            if (client.lastChecked != "-") "Synced ${client.lastChecked}" else ""
-
         val rawMsgs = client.getMessages()
-        val filtered = rawMsgs.filter { m ->
-            val segOk = when (currentSegment) {
-                "starred" -> starredIds.contains(m.id)
-                "otp" -> !m.otp.isNullOrBlank()
-                else -> true
+        val filtered = if (searchQuery.isEmpty()) {
+            rawMsgs
+        } else {
+            rawMsgs.filter { m ->
+                m.from.lowercase(Locale.US).contains(searchQuery)
+                    || m.subject.lowercase(Locale.US).contains(searchQuery)
+                    || m.textBody.lowercase(Locale.US).contains(searchQuery)
+                    || (m.otp?.contains(searchQuery) == true)
             }
-            if (!segOk) return@filter false
-            if (searchQuery.isEmpty()) return@filter true
-            m.from.lowercase(Locale.US).contains(searchQuery)
-                || m.subject.lowercase(Locale.US).contains(searchQuery)
-                || m.textBody.lowercase(Locale.US).contains(searchQuery)
-                || (m.otp?.contains(searchQuery) == true)
         }
 
-        findViewById<TextView>(R.id.tvMsgCount).text = "${filtered.size} messages"
+        findViewById<TextView>(R.id.tvInboxTitle).text = "INBOX (${filtered.size})"
         messagesAdapter.updateData(filtered)
 
         val emptyInbox = findViewById<LinearLayout>(R.id.layoutEmptyInbox)
@@ -355,20 +249,6 @@ class MainActivity : AppCompatActivity() {
         } else {
             emptyInbox.visibility = View.GONE
             rv.visibility = View.VISIBLE
-        }
-
-        refreshHistoryVisibility()
-    }
-
-    private fun refreshHistoryVisibility() {
-        val rvHist = findViewById<RecyclerView>(R.id.recyclerViewHistory)
-        val emptyHist = findViewById<TextView>(R.id.layoutEmptyHistory)
-        if (historyItems.isEmpty()) {
-            rvHist.visibility = View.GONE
-            emptyHist.visibility = View.VISIBLE
-        } else {
-            rvHist.visibility = View.VISIBLE
-            emptyHist.visibility = View.GONE
         }
     }
 

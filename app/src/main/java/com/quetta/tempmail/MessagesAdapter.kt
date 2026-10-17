@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.CheckBox
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -13,9 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 
 class MessagesAdapter(
     private var items: List<EmailMessage>,
-    private val starredIds: Set<String>,
     private val expandedIds: MutableSet<String>,
-    private val onStarClick: (String) -> Unit,
     private val onToggleExpand: (String) -> Unit,
     private val onCopyOtpClick: (String) -> Unit,
     private val onDeleteClick: (EmailMessage) -> Unit,
@@ -27,7 +24,6 @@ class MessagesAdapter(
         val tvAvatarText: TextView = view.findViewById(R.id.tvAvatarText)
         val tvSender: TextView = view.findViewById(R.id.tvSender)
         val tvTime: TextView = view.findViewById(R.id.tvTime)
-        val cbStar: CheckBox = view.findViewById(R.id.cbStar)
         val tvSubject: TextView = view.findViewById(R.id.tvSubject)
         val tvPreview: TextView = view.findViewById(R.id.tvPreview)
         val btnCopyOtpChip: Button = view.findViewById(R.id.btnCopyOtpChip)
@@ -45,7 +41,6 @@ class MessagesAdapter(
 
     fun updateData(newItems: List<EmailMessage>) {
         items = newItems
-        // drop expanded state for messages that no longer exist
         expandedIds.retainAll(newItems.map { it.id }.toSet())
         notifyDataSetChanged()
     }
@@ -68,10 +63,6 @@ class MessagesAdapter(
         holder.tvSubject.text = (if (msg.hasAttachment) "📎 " else "") + msg.subject
         holder.tvPreview.text = msg.preview
         holder.tvTime.text = formatShortTime(msg.date)
-
-        holder.cbStar.setOnCheckedChangeListener(null)
-        holder.cbStar.isChecked = starredIds.contains(msg.id)
-        holder.cbStar.setOnCheckedChangeListener { _, _ -> onStarClick(msg.id) }
 
         holder.itemView.setOnClickListener { onToggleExpand(msg.id) }
 
