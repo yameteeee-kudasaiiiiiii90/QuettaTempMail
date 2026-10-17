@@ -89,7 +89,7 @@ class MainActivity : AppCompatActivity() {
             emptyList(),
             starredIds,
             onStarClick = { id ->
-                if (starredIds.contains(id)) starredIds.remove(id) elsestarredIds.add(id)
+                if (starredIds.contains(id)) starredIds.remove(id) else starredIds.add(id)
                 refreshUiState()
             },
             onItemClick = { msg ->
